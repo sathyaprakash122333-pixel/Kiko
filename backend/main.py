@@ -1,3 +1,5 @@
+import hmac
+from fastapi import Request
 import json
 import os
 from contextlib import asynccontextmanager
@@ -1025,3 +1027,95 @@ def get_latest_exam_result(
 
     return get_exam_attempt_result(attempt_id=latest_attempt.id, current_user=current_user, db=db)
 
+# Temporary protected content import endpoint
+@app.post("/admin/import-content", tags=["Admin"])
+async def import_content(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    expected_token = os.getenv("KIKO_IMPORT_TOKEN", "")
+    supplied_token = request.headers.get("X-Import-Token", "")
+
+    if not expected_token or not hmac.compare_digest(
+        supplied_token, expected_token
+    ):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    data = await request.json()
+
+    required_tables = {
+        "courses", "lessons", "exams", "exam_questions"
+    }
+    if not isinstance(data, dict) or set(data.keys()) != required_tables:
+        raise HTTPException(status_code=400, detail="Invalid import data")
+
+    try:
+        for table in required_tables:
+            if not isinstance(data[table], list):
+                raise ValueError(f"{table} must be a list")
+
+        # Validate relationships before changing anything.
+        course_ids = {r["id"] for r in data["courses"]}
+        lesson_ids = {r["id"] for r in data["lessons"]}
+        exam_ids = {r["id"] for r in data["exams"]}
+
+        if any(r["course_id"] not in course_ids for r in data["lessons"]):
+            raise ValueError("A lesson references a missing course")
+        if any(
+            r["lesson_id"] not in lesson_ids
+            or (
+                r.get("course_id") is not None
+                and r["course_id"] not in course_ids
+            )
+            for r in data["exams"]
+        ):
+            raise ValueError("An exam references missing content")
+        if any(r["exam_id"] not in exam_ids for r in data["exam_questions"]):
+            raise ValueError("A question references a missing exam")
+
+        # Do not overwrite a database that already has course content.
+        if (
+            db.query(Course).count()
+            or db.query(Lesson).count()
+            or db.query(Exam).count()
+            or db.query(ExamQuestion).count()
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail="Database already contains course content; import cancelled",
+            )
+
+        # Insert in foreign-key order and preserve the original IDs.
+        for row in data["courses"]:
+            db.add(Course(**row))
+        db.flush()
+
+        for row in data["lessons"]:
+            db.add(Lesson(**row))
+        db.flush()
+
+        for row in data["exams"]:
+            db.add(Exam(**row))
+        db.flush()
+
+        for row in data["exam_questions"]:
+            db.add(ExamQuestion(**row))
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "imported": {
+                table: len(data[table]) for table in sorted(required_tables)
+            },
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail=f"Import failed; transaction rolled back: {type(exc).__name__}",
+        )
