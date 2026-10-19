@@ -1,0 +1,43 @@
+
+# Python
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local databases and backups
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.bak
+
+# Secrets
+.env
+.env.*
+!.env.example
+**/*service-account*.json
+
+# Flutter
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# IDE and OS files
+.idea/
+.DS_Store
+# Kiko database files
+kiko.db
+kiko.db-*
+
+# Design reference photos
+/design
+/frontend/design/
+
+# Flutter generated files
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
