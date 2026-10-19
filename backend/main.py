@@ -1034,6 +1034,13 @@ async def import_content(
     db: Session = Depends(get_db),
 ):
     expected_token = os.getenv("KIKO_IMPORT_TOKEN", "")
+    print(
+    "IMPORT TOKEN CHECK:",
+    "configured" if expected_token else "MISSING",
+    "length:",
+    len(expected_token),
+)
+
     supplied_token = request.headers.get("X-Import-Token", "")
 
     if not expected_token or not hmac.compare_digest(
