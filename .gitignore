@@ -41,3 +41,4 @@ kiko.db-*
 **/build/
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
+backend/models.py.backup
