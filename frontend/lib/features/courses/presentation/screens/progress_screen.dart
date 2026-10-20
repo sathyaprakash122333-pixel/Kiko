@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/kiko_app_shell.dart';
 import '../../../../core/widgets/kiko_top_header.dart';
@@ -104,7 +105,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+          valueColor: AlwaysStoppedAnimation<Color>(KikoColors.primaryForest),
         ),
       );
     }
@@ -116,22 +117,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Color(0xFFEF4444)),
+              const Icon(Icons.error_outline, size: 48, color: KikoColors.error),
               const SizedBox(height: 16),
               const Text(
                 'Unable to Load Progress',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(color: KikoColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 _errorMessage!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                style: const TextStyle(color: KikoColors.textSecondary, fontSize: 13),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E2F38),
+                  backgroundColor: KikoColors.primaryForest,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -166,7 +167,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     Text(
                       'Your Learning Progress',
                       style: KikoTypography.headlineMd(
-                        color: Colors.white,
+                        color: KikoColors.textPrimary,
                         fontWeight: FontWeight.bold,
                       ).copyWith(fontSize: 22, letterSpacing: -0.4),
                     ),
@@ -174,7 +175,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               const Text(
                 'Track your journey, celebrate your progress, and reach your goals!',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: KikoColors.textSecondary,
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -191,7 +192,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Text(
                 'Course progress',
                 style: KikoTypography.headlineMd(
-                  color: Colors.white,
+                  color: KikoColors.textPrimary,
                   fontWeight: FontWeight.bold,
                 ).copyWith(fontSize: 18),
               ),
@@ -220,7 +221,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   Text(
                     'Recent test results',
                     style: KikoTypography.headlineMd(
-                      color: Colors.white,
+                      color: KikoColors.textPrimary,
                       fontWeight: FontWeight.bold,
                     ).copyWith(fontSize: 18),
                   ),
@@ -228,7 +229,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     Text(
                       '${_progress.recentTestAttempts.length} Total',
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: KikoColors.textSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -279,15 +280,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   children: [
                     CircularProgressIndicator(
                       value: (overallPct / 100.0).clamp(0.0, 1.0),
-                      backgroundColor: const Color(0xFF1E2D36),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+                      backgroundColor: KikoColors.border,
+                      valueColor: const AlwaysStoppedAnimation<Color>(KikoColors.secondaryEmerald),
                       strokeWidth: 4.5,
                     ),
                     Center(
                       child: Text(
                         '${overallPct.toInt()}%',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: KikoColors.textPrimary,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -304,7 +305,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             _buildStatCard(
               width: cardWidth,
               icon: Icons.check_circle_outline,
-              iconColor: const Color(0xFF00A86B),
+              iconColor: KikoColors.secondaryEmerald,
               title: 'Lessons completed',
               value: '$completedLessons / $totalLessons',
             ),
@@ -313,7 +314,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             _buildStatCard(
               width: cardWidth,
               icon: Icons.military_tech_outlined,
-              iconColor: const Color(0xFF38BDF8),
+              iconColor: KikoColors.primaryForest,
               title: 'Tests passed',
               value: '$passedExams / $totalExams',
             ),
@@ -322,7 +323,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             _buildStatCard(
               width: cardWidth,
               icon: Icons.star_border,
-              iconColor: const Color(0xFFFBBF24),
+              iconColor: const Color(0xFFD97706),
               title: 'Average test score',
               value: avgScore > 0 ? '${avgScore.toInt()}%' : 'N/A',
             ),
@@ -345,9 +346,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
       width: width,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2F38), width: 1.2),
+        border: Border.all(color: KikoColors.border, width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -359,17 +360,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: (iconColor ?? const Color(0xFF00A86B)).withValues(alpha: 0.15),
+                color: (iconColor ?? KikoColors.secondaryEmerald).withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor ?? const Color(0xFF00A86B), size: 24),
+              child: Icon(icon, color: iconColor ?? KikoColors.secondaryEmerald, size: 24),
             ),
           const SizedBox(height: 10),
           Text(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Color(0xFF94A3B8),
+              color: KikoColors.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -380,7 +381,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               value,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: KikoColors.textPrimary,
                 fontSize: 19,
                 fontWeight: FontWeight.bold,
               ),
@@ -390,7 +391,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               subtitle,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFFCBD5E1),
+                color: KikoColors.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -403,15 +404,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget _buildCourseProgressCard(CourseProgressItem cp) {
     final isC = cp.language.toLowerCase().contains('c') &&
         !cp.language.toLowerCase().contains('python');
-    final badgeColor = isC ? const Color(0xFF1D4ED8) : const Color(0xFF0284C7);
-    final badgeBorder = isC ? const Color(0xFF3B82F6) : const Color(0xFF38BDF8);
     final badgeText = isC ? 'C Language' : 'Python';
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2F38), width: 1.2),
+        border: Border.all(color: KikoColors.border, width: 1.2),
       ),
       child: Material(
         color: Colors.transparent,
@@ -440,15 +439,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.25),
+                        color: KikoColors.tertiaryMint,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: badgeBorder.withValues(alpha: 0.6)),
+                        border: Border.all(color: KikoColors.secondaryEmerald.withValues(alpha: 0.3)),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         isC ? 'C' : 'Py',
-                        style: TextStyle(
-                          color: badgeBorder,
+                        style: const TextStyle(
+                          color: KikoColors.primaryForest,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'monospace',
@@ -460,7 +459,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       child: Text(
                         cp.courseTitle,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: KikoColors.textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
@@ -472,14 +471,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.15),
+                        color: KikoColors.hover,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: badgeBorder.withValues(alpha: 0.4)),
+                        border: Border.all(color: KikoColors.border),
                       ),
                       child: Text(
                         badgeText,
-                        style: TextStyle(
-                          color: badgeBorder,
+                        style: const TextStyle(
+                          color: KikoColors.textSecondary,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -498,8 +497,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         borderRadius: BorderRadius.circular(6),
                         child: LinearProgressIndicator(
                           value: (cp.completionPercentage / 100.0).clamp(0.0, 1.0),
-                          backgroundColor: const Color(0xFF18262E),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+                          backgroundColor: KikoColors.border,
+                          valueColor: const AlwaysStoppedAnimation<Color>(KikoColors.secondaryEmerald),
                           minHeight: 7,
                         ),
                       ),
@@ -508,13 +507,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     Text(
                       '${cp.completionPercentage.toInt()}%',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: KikoColors.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.chevron_right, size: 18, color: Color(0xFF64748B)),
+                    const Icon(Icons.chevron_right, size: 18, color: KikoColors.textSecondary),
                   ],
                 ),
 
@@ -523,12 +522,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 // Bottom row: Lessons count & Test status
                 Row(
                   children: [
-                    const Icon(Icons.menu_book_outlined, size: 14, color: Color(0xFF94A3B8)),
+                    const Icon(Icons.menu_book_outlined, size: 14, color: KikoColors.textSecondary),
                     const SizedBox(width: 6),
                     Text(
                       '${cp.completedLessons} / ${cp.totalLessons} lessons completed',
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: KikoColors.textSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -550,12 +549,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle, size: 14, color: Color(0xFF00A86B)),
+          const Icon(Icons.check_circle, size: 14, color: KikoColors.secondaryEmerald),
           const SizedBox(width: 4),
           Text(
             'Test passed (${cp.testScore}/${cp.testTotalQuestions})',
             style: const TextStyle(
-              color: Color(0xFF00A86B),
+              color: KikoColors.secondaryEmerald,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -566,12 +565,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.info_outline, size: 14, color: Color(0xFFF59E0B)),
+          const Icon(Icons.info_outline, size: 14, color: Color(0xFFB45309)),
           const SizedBox(width: 4),
           Text(
             'Test score: ${cp.testScore}/${cp.testTotalQuestions} (Needs Review)',
             style: const TextStyle(
-              color: Color(0xFFF59E0B),
+              color: Color(0xFFB45309),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -583,12 +582,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.quiz_outlined, size: 14, color: Color(0xFF64748B)),
+        Icon(Icons.quiz_outlined, size: 14, color: KikoColors.textSecondary),
         SizedBox(width: 4),
         Text(
           'Test not attempted',
           style: TextStyle(
-            color: Color(0xFF64748B),
+            color: KikoColors.textSecondary,
             fontSize: 12,
             fontStyle: FontStyle.italic,
           ),
@@ -605,23 +604,23 @@ class _ProgressScreenState extends State<ProgressScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
-          color: const Color(0xFF121E24),
+          color: KikoColors.secondarySurface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF1E2F38)),
+          border: Border.all(color: KikoColors.border),
         ),
         child: const Column(
           children: [
-            Icon(Icons.assignment_outlined, size: 40, color: Color(0xFF64748B)),
+            Icon(Icons.assignment_outlined, size: 40, color: KikoColors.textSecondary),
             SizedBox(height: 12),
             Text(
               'No Assessments Attempted Yet',
-              style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+              style: TextStyle(color: KikoColors.textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 4),
             Text(
               'Complete course lessons and take final assessments to view authoritative results here.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+              style: TextStyle(color: KikoColors.textSecondary, fontSize: 13),
             ),
           ],
         ),
@@ -630,9 +629,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2F38), width: 1.2),
+        border: Border.all(color: KikoColors.border, width: 1.2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -640,7 +639,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           children: [
             // Table Header
             Container(
-              color: const Color(0xFF152229),
+              color: KikoColors.hover,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               child: const Row(
                 children: [
@@ -648,28 +647,28 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     flex: 4,
                     child: Text(
                       'Course',
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: KikoColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Expanded(
                     flex: 2,
                     child: Text(
                       'Score',
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: KikoColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Expanded(
                     flex: 2,
                     child: Text(
                       'Status',
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: KikoColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Expanded(
                     flex: 3,
                     child: Text(
                       'Date',
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: KikoColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -681,13 +680,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: attempts.length,
-              separatorBuilder: (_, _) => const Divider(color: Color(0xFF1B2931), height: 1),
+              separatorBuilder: (_, _) => const Divider(color: KikoColors.border, height: 1),
               itemBuilder: (_, index) {
                 final attempt = attempts[index];
                 final isC = attempt.language.toLowerCase().contains('c') &&
                     !attempt.language.toLowerCase().contains('python');
-                final badgeColor = isC ? const Color(0xFF1D4ED8) : const Color(0xFF0284C7);
-                final badgeBorder = isC ? const Color(0xFF3B82F6) : const Color(0xFF38BDF8);
 
                 return InkWell(
                   onTap: _isLoadingResult
@@ -734,15 +731,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: badgeColor.withValues(alpha: 0.25),
+                                  color: KikoColors.tertiaryMint,
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: badgeBorder.withValues(alpha: 0.5)),
+                                  border: Border.all(color: KikoColors.secondaryEmerald.withValues(alpha: 0.3)),
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
                                   isC ? 'C' : 'Py',
-                                  style: TextStyle(
-                                    color: badgeBorder,
+                                  style: const TextStyle(
+                                    color: KikoColors.primaryForest,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -753,7 +750,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 child: Text(
                                   attempt.courseTitle,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: KikoColors.textPrimary,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -771,7 +768,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           child: Text(
                             '${attempt.score} / ${attempt.totalQuestions}',
                             style: const TextStyle(
-                              color: Color(0xFFCBD5E1),
+                              color: KikoColors.textPrimary,
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'monospace',
@@ -788,19 +785,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
                                 color: attempt.passed
-                                    ? const Color(0xFF00A86B).withValues(alpha: 0.2)
-                                    : const Color(0xFFEF4444).withValues(alpha: 0.2),
+                                    ? KikoColors.tertiaryMint
+                                    : KikoColors.errorContainer,
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
                                   color: attempt.passed
-                                      ? const Color(0xFF00A86B).withValues(alpha: 0.5)
-                                      : const Color(0xFFEF4444).withValues(alpha: 0.5),
+                                      ? KikoColors.secondaryEmerald.withValues(alpha: 0.4)
+                                      : KikoColors.error.withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Text(
                                 attempt.passed ? 'Passed' : 'Failed',
                                 style: TextStyle(
-                                  color: attempt.passed ? const Color(0xFF00A86B) : const Color(0xFFF87171),
+                                  color: attempt.passed ? KikoColors.secondaryEmerald : KikoColors.error,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -818,11 +815,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               Text(
                                 _formatDate(attempt.attemptedAt),
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: KikoColors.textSecondary,
                                   fontSize: 12,
                                 ),
                               ),
-                              const Icon(Icons.chevron_right, size: 16, color: Color(0xFF64748B)),
+                              const Icon(Icons.chevron_right, size: 16, color: KikoColors.textSecondary),
                             ],
                           ),
                         ),
@@ -843,14 +840,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2F38)),
+        border: Border.all(color: KikoColors.border),
       ),
       child: const Center(
         child: Text(
           'No course progress found.',
-          style: TextStyle(color: Color(0xFF94A3B8)),
+          style: TextStyle(color: KikoColors.textSecondary),
         ),
       ),
     );

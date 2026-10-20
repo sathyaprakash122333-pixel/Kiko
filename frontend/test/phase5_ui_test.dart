@@ -409,41 +409,30 @@ void main() {
         ),
       );
 
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       await tester.pumpAndSettle();
 
-      // Page Title
-      expect(find.text('Student Profile'), findsOneWidget);
-      expect(find.text('Manage your account information and view your learning summary.'), findsOneWidget);
+      // Page Title & Header
+      expect(find.text('Profile'), findsWidgets);
+      expect(find.text('Edit Profile'), findsOneWidget);
 
       // User details
-      expect(find.text('Sathya Prakash'), findsOneWidget);
+      expect(find.text('Sathya Prakash'), findsWidgets);
       expect(find.text('sathyaprakash12233@gmail.com'), findsOneWidget);
 
-      // Welcome Sync Banner
-      expect(find.text('Welcome, Sathya!'), findsOneWidget);
-      expect(find.text('Your profile and learning records are continuously synchronized.'), findsOneWidget);
-
-      // Account Info
-      expect(find.text('Account Information'), findsOneWidget);
-      expect(find.text('Member Since'), findsOneWidget);
-      expect(find.text('Last Active Session'), findsOneWidget);
-
-      // Diagnostic UID
-      expect(find.text('Authentication & Security'), findsOneWidget);
-      expect(find.text('Google Account'), findsOneWidget);
-      expect(find.text('Diagnostic User Identifier (UID)'), findsOneWidget);
-      expect(find.text('nR9dq5fUnN06070Kz2nVTV1mmC22'), findsOneWidget);
-
-      // Learning Summary Card
-      expect(find.text('Learning Summary'), findsOneWidget);
-      expect(find.text('Lessons Completed'), findsOneWidget);
-      expect(find.text('7 / 20'), findsOneWidget);
-      expect(find.text('Tests Passed'), findsOneWidget);
-      expect(find.text('1 / 2'), findsOneWidget);
+      // Cards
+      expect(find.text('Personal Information'), findsOneWidget);
+      expect(find.text('Academic Information'), findsOneWidget);
+      expect(find.text('Learning Overview'), findsOneWidget);
+      expect(find.text('Account & Security'), findsOneWidget);
 
       // Sign Out Button
       expect(find.text('Sign Out'), findsWidgets);
     });
+
 
     testWidgets('KikoAppShell renders desktop sidebar on wide screens and mobile bar on narrow screens', (tester) async {
       // Desktop width test

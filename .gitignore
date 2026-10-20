@@ -31,14 +31,20 @@
 # Kiko database files
 kiko.db
 kiko.db-*
+*.backup*
+*.backup
+*.before_*
+*before_import_backup*
+backend/*.backup*
+kiko_content_export.json
+backend/kiko_content_export.json
+design
+design/
+frontend/design/
 
-# Design reference photos
-/design
-/frontend/design/
 
 # Flutter generated files
 **/.dart_tool/
 **/build/
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
-backend/models.py.backup

@@ -2,8 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import '../../features/auth/logic/auth_service.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../theme/app_colors.dart';
+import 'kiko_sprout_logo.dart';
 
-/// Top header bar styled according to the Kiko mobile-first reference layout
+/// Top header bar styled according to the Kiko light design system
 class KikoTopHeader extends StatelessWidget {
   const KikoTopHeader({
     super.key,
@@ -44,7 +46,7 @@ class KikoTopHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Left: Either Brand (Logo + Kiko) or Back Button + Title
+          // Left: Either Brand (Sprout Logo + Kiko) or Back Button + Title
           Expanded(
             child: showBack
                 ? Row(
@@ -56,14 +58,17 @@ class KikoTopHeader extends StatelessWidget {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF142026),
+                            color: KikoColors.secondarySurface,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFF22343E), width: 1),
+                            border: Border.all(
+                              color: KikoColors.border,
+                              width: 1,
+                            ),
                           ),
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.arrow_back,
-                            color: Colors.white,
+                            color: KikoColors.textPrimary,
                             size: 18,
                           ),
                         ),
@@ -77,7 +82,7 @@ class KikoTopHeader extends StatelessWidget {
                             Text(
                               title ?? '',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: KikoColors.textPrimary,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.3,
@@ -89,7 +94,7 @@ class KikoTopHeader extends StatelessWidget {
                               Text(
                                 subtitle!,
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: KikoColors.textSecondary,
                                   fontSize: 12,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -106,35 +111,24 @@ class KikoTopHeader extends StatelessWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F2620),
+                          color: KikoColors.tertiaryMint,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF00A86B).withValues(alpha: 0.5),
-                            width: 1.2,
+                            color: KikoColors.border,
+                            width: 1,
                           ),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(9),
-                          child: Image.asset(
-                            'assets/images/kiko_mascot_logo.png',
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Image.asset(
-                              'assets/images/tofu_mascot.png',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => const Icon(
-                                Icons.terminal,
-                                color: Color(0xFF00A86B),
-                                size: 20,
-                              ),
-                            ),
-                          ),
+                        alignment: Alignment.center,
+                        child: const KikoSproutLogo(
+                          size: 22,
+                          color: KikoColors.primaryForest,
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         title ?? 'Kiko',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: KikoColors.textPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           letterSpacing: -0.4,
@@ -166,14 +160,17 @@ class KikoTopHeader extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF142026),
+                      color: KikoColors.secondarySurface,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF22343E), width: 1),
+                      border: Border.all(
+                        color: KikoColors.border,
+                        width: 1,
+                      ),
                     ),
                     alignment: Alignment.center,
                     child: const Icon(
                       Icons.notifications_none_rounded,
-                      color: Color(0xFF94A3B8),
+                      color: KikoColors.textSecondary,
                       size: 19,
                     ),
                   ),
@@ -202,12 +199,13 @@ class KikoTopHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF00A86B),
+                        color: KikoColors.border,
                         width: 1.5,
                       ),
                     ),
                     child: ClipOval(
-                      child: currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty
+                      child: currentUser?.photoURL != null &&
+                              currentUser!.photoURL!.isNotEmpty
                           ? Image.network(
                               currentUser.photoURL!,
                               fit: BoxFit.cover,
@@ -225,17 +223,13 @@ class KikoTopHeader extends StatelessWidget {
   }
 
   Widget _buildAvatarFallback() {
-    return Image.asset(
-      'assets/images/kiko_mascot_logo.png',
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Image.asset(
-        'assets/images/tofu_mascot.png',
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const Icon(
-          Icons.person,
-          color: Color(0xFF00A86B),
-          size: 20,
-        ),
+    return Container(
+      color: KikoColors.secondarySurface,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.person,
+        color: KikoColors.primaryForest,
+        size: 20,
       ),
     );
   }

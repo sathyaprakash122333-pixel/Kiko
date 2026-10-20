@@ -3,7 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../courses/models/course.dart';
 
-/// Card displaying course details, language badge, and lesson count
+/// Card displaying course details, language badge, and lesson count in the light design system
 class CourseCard extends StatelessWidget {
   const CourseCard({
     super.key,
@@ -17,13 +17,13 @@ class CourseCard extends StatelessWidget {
   Color get _languageColor {
     final lang = course.language.toLowerCase();
     if (lang.contains('c') && !lang.contains('c#') && !lang.contains('css')) {
-      return const Color(0xFF3B82F6); // Blue for C
+      return const Color(0xFF2563EB); // Accessible Blue for C
     } else if (lang.contains('python')) {
-      return const Color(0xFF38BDF8); // Sky blue / Python
+      return const Color(0xFF0D9488); // Teal for Python
     } else if (lang.contains('rust')) {
-      return const Color(0xFFF97316); // Orange for Rust
+      return const Color(0xFFEA580C); // Orange for Rust
     }
-    return const Color(0xFF10B981); // Emerald default
+    return KikoColors.secondaryEmerald;
   }
 
   Widget _buildLanguageIcon() {
@@ -33,10 +33,10 @@ class CourseCard extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: const Color(0xFF1E3A8A).withValues(alpha: 0.5),
+          color: const Color(0xFFEFF6FF),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
+            color: const Color(0xFFBFDBFE),
             width: 1,
           ),
         ),
@@ -44,7 +44,7 @@ class CourseCard extends StatelessWidget {
           child: Text(
             'C',
             style: TextStyle(
-              color: Color(0xFF60A5FA),
+              color: Color(0xFF2563EB),
               fontSize: 22,
               fontWeight: FontWeight.bold,
               fontFamily: 'monospace',
@@ -57,17 +57,17 @@ class CourseCard extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: const Color(0xFF0F766E).withValues(alpha: 0.4),
+          color: const Color(0xFFF0FDFA),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF2DD4BF).withValues(alpha: 0.4),
+            color: const Color(0xFF99F6E4),
             width: 1,
           ),
         ),
         child: const Center(
           child: Icon(
             Icons.code,
-            color: Color(0xFF2DD4BF),
+            color: Color(0xFF0D9488),
             size: 24,
           ),
         ),
@@ -77,17 +77,17 @@ class CourseCard extends StatelessWidget {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: KikoColors.surfaceContainerHigh,
+        color: KikoColors.tertiaryMint,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: KikoColors.outlineVariant,
+          color: KikoColors.border,
           width: 1,
         ),
       ),
       child: const Center(
         child: Icon(
           Icons.terminal,
-          color: KikoColors.primaryContainer,
+          color: KikoColors.primaryForest,
           size: 24,
         ),
       ),
@@ -98,17 +98,17 @@ class CourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF131F24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF22343C),
+          color: KikoColors.border,
           width: 1.2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: Color(0x0826352D),
+            blurRadius: 12,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -117,139 +117,135 @@ class CourseCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
+          hoverColor: KikoColors.hover,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Top row with language icon and pill
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top row with language icon and pill
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildLanguageIcon(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _languageColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _languageColor.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            course.language == 'C'
+                                ? 'C Language'
+                                : course.language,
+                            style: TextStyle(
+                              color: _languageColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Course Title
+                    Text(
+                      course.title,
+                      style: KikoTypography.headlineMd(
+                        color: KikoColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ).copyWith(fontSize: 18, height: 1.3),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Course Description
+                    Text(
+                      course.description,
+                      style: KikoTypography.bodySm(
+                        color: KikoColors.textSecondary,
+                      ).copyWith(fontSize: 13, height: 1.45),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Bottom action row: lesson count & view course button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildLanguageIcon(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _languageColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: _languageColor.withValues(alpha: 0.35),
-                          width: 1,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.menu_book_outlined,
+                          size: 17,
+                          color: KikoColors.textSecondary,
                         ),
-                      ),
-                      child: Text(
-                        course.language == 'C' ? 'C Language' : course.language,
-                        style: TextStyle(
-                          color: _languageColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Course Title
-                Text(
-                  course.title,
-                  style: KikoTypography.headlineMd(
-                    color: KikoColors.textHeadline,
-                    fontWeight: FontWeight.w700,
-                  ).copyWith(fontSize: 18, height: 1.3),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 10),
-
-                // Course Description
-                Text(
-                  course.description,
-                  style: KikoTypography.bodySm(
-                    color: const Color(0xFF94A3B8),
-                  ).copyWith(fontSize: 13, height: 1.45),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Bottom action row: lesson count & view course button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.menu_book_outlined,
-                      size: 17,
-                      color: Color(0xFF94A3B8),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${course.lessonCount} lessons',
-                      style: KikoTypography.bodySm(
-                        color: const Color(0xFF94A3B8),
-                        fontWeight: FontWeight.w500,
-                      ).copyWith(fontSize: 13),
-                    ),
-                  ],
-                ),
-                InkWell(
-                  onTap: onTap,
-                  borderRadius: BorderRadius.circular(24),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 9,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF10B981).withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
+                        const SizedBox(width: 6),
                         Text(
-                          'View Course',
-                          style: TextStyle(
-                            color: Color(0xFF022C22),
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 14,
-                          color: Color(0xFF022C22),
+                          '${course.lessonCount} lessons',
+                          style: KikoTypography.bodySm(
+                            color: KikoColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ).copyWith(fontSize: 13),
                         ),
                       ],
                     ),
-                  ),
+                    InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 9,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KikoColors.primaryForest,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              'View Course',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 }

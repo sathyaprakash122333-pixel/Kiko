@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../auth/logic/auth_service.dart';
 import '../../../courses/logic/course_api_service.dart';
@@ -127,7 +128,7 @@ class _LessonScreenState extends State<LessonScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_isCompleted ? 'Lesson marked as complete!' : 'Lesson marked as incomplete.'),
-          backgroundColor: const Color(0xFF00A86B),
+          backgroundColor: KikoColors.secondaryEmerald,
           duration: const Duration(seconds: 2),
         ),
       );
@@ -137,7 +138,7 @@ class _LessonScreenState extends State<LessonScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update lesson completion: $e'),
-          backgroundColor: const Color(0xFFEF4444),
+          backgroundColor: KikoColors.error,
           action: SnackBarAction(
             label: 'Retry',
             textColor: Colors.white,
@@ -171,11 +172,15 @@ class _LessonScreenState extends State<LessonScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1317),
+      backgroundColor: KikoColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F181D),
+        backgroundColor: KikoColors.surface,
         elevation: 0,
         centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: KikoColors.border, height: 1),
+        ),
         leading: Padding(
           padding: const EdgeInsets.only(left: 16),
           child: Center(
@@ -186,14 +191,14 @@ class _LessonScreenState extends State<LessonScreen> {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF142026),
+                  color: KikoColors.secondarySurface,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF22343E), width: 1),
+                  border: Border.all(color: KikoColors.border, width: 1),
                 ),
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.arrow_back,
-                  color: Colors.white,
+                  color: KikoColors.textPrimary,
                   size: 18,
                 ),
               ),
@@ -203,14 +208,14 @@ class _LessonScreenState extends State<LessonScreen> {
         title: const Text(
           'Lesson',
           style: TextStyle(
-            color: Colors.white,
+            color: KikoColors.textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8)),
+            icon: const Icon(Icons.more_vert, color: KikoColors.textSecondary),
             tooltip: 'Options',
             onPressed: () {},
           ),
@@ -221,7 +226,7 @@ class _LessonScreenState extends State<LessonScreen> {
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+                  valueColor: AlwaysStoppedAnimation<Color>(KikoColors.primaryForest),
                 ),
               )
             : _errorMessage != null
@@ -244,20 +249,20 @@ class _LessonScreenState extends State<LessonScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withValues(alpha: 0.15),
+                color: KikoColors.errorContainer,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Color(0xFFEF4444),
+                color: KikoColors.error,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               'Unable to Load Lesson',
               style: KikoTypography.headlineMd(
-                color: Colors.white,
+                color: KikoColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -266,24 +271,24 @@ class _LessonScreenState extends State<LessonScreen> {
               _errorMessage ?? 'An unexpected error occurred while fetching the lesson.',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF94A3B8),
+                color: KikoColors.textSecondary,
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => _fetchLesson(_currentLessonId),
-              icon: const Icon(Icons.refresh, size: 16, color: Color(0xFF042F24)),
+              icon: const Icon(Icons.refresh, size: 16, color: Colors.white),
               label: const Text(
                 'Retry',
                 style: TextStyle(
-                  color: Color(0xFF042F24),
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00A86B),
-                foregroundColor: const Color(0xFF042F24),
+                backgroundColor: KikoColors.primaryForest,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 elevation: 0,
@@ -303,7 +308,7 @@ class _LessonScreenState extends State<LessonScreen> {
     final title = widget.courseTitle ?? '';
     final isPython = title.toLowerCase().contains('python');
     final langLabel = isPython ? 'Python' : 'C Language';
-    final langColor = isPython ? const Color(0xFF38BDF8) : const Color(0xFF3B82F6);
+    final langColor = isPython ? const Color(0xFF0284C7) : const Color(0xFF2563EB);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -319,14 +324,14 @@ class _LessonScreenState extends State<LessonScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00A86B).withValues(alpha: 0.15),
+                    color: KikoColors.tertiaryMint,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF00A86B).withValues(alpha: 0.4)),
+                    border: Border.all(color: KikoColors.secondaryEmerald.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     'Lesson ${lesson.orderNumber}',
                     style: const TextStyle(
-                      color: Color(0xFF00A86B),
+                      color: KikoColors.primaryForest,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -339,7 +344,7 @@ class _LessonScreenState extends State<LessonScreen> {
               Text(
                 lesson.title,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: KikoColors.textPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.3,
@@ -354,9 +359,9 @@ class _LessonScreenState extends State<LessonScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: langColor.withValues(alpha: 0.15),
+                      color: langColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: langColor.withValues(alpha: 0.35)),
+                      border: Border.all(color: langColor.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -381,12 +386,12 @@ class _LessonScreenState extends State<LessonScreen> {
                   const SizedBox(width: 12),
                   Row(
                     children: const [
-                      Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF94A3B8)),
+                      Icon(Icons.access_time_rounded, size: 14, color: KikoColors.textSecondary),
                       SizedBox(width: 4),
                       Text(
                         '~ 12 min',
                         style: TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: KikoColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -398,14 +403,14 @@ class _LessonScreenState extends State<LessonScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                        color: const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.35)),
+                        border: Border.all(color: const Color(0xFFFDE68A)),
                       ),
                       child: const Text(
                         'Assessment Included',
                         style: TextStyle(
-                          color: Color(0xFFFBBF24),
+                          color: Color(0xFFB45309),
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
@@ -436,10 +441,10 @@ class _LessonScreenState extends State<LessonScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _isCompleted ? const Color(0xFF063327) : const Color(0xFF121E24),
+        color: _isCompleted ? KikoColors.tertiaryMint : KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _isCompleted ? const Color(0xFF00A86B) : const Color(0xFF1E2D36),
+          color: _isCompleted ? KikoColors.secondaryEmerald : KikoColors.border,
           width: 1.2,
         ),
       ),
@@ -449,12 +454,12 @@ class _LessonScreenState extends State<LessonScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _isCompleted ? const Color(0xFF00A86B).withValues(alpha: 0.2) : const Color(0xFF16232B),
+              color: _isCompleted ? KikoColors.secondaryEmerald.withValues(alpha: 0.15) : KikoColors.hoverBackground,
               shape: BoxShape.circle,
             ),
             child: Icon(
               _isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
-              color: _isCompleted ? const Color(0xFF00A86B) : const Color(0xFF94A3B8),
+              color: _isCompleted ? KikoColors.secondaryEmerald : KikoColors.textSecondary,
               size: 20,
             ),
           ),
@@ -466,7 +471,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 Text(
                   _isCompleted ? 'Lesson Completed!' : 'Finished this lesson?',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: KikoColors.textPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
@@ -477,7 +482,7 @@ class _LessonScreenState extends State<LessonScreen> {
                       ? 'Progress saved to your account.'
                       : 'Mark complete to track your learning journey.',
                   style: const TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: KikoColors.textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -499,19 +504,19 @@ class _LessonScreenState extends State<LessonScreen> {
                 : Icon(
                     _isCompleted ? Icons.check : Icons.done_all_rounded,
                     size: 14,
-                    color: _isCompleted ? Colors.white : const Color(0xFF042F24),
+                    color: Colors.white,
                   ),
             label: Text(
               _isCompleted ? 'Completed' : 'Mark Complete',
-              style: TextStyle(
-                color: _isCompleted ? Colors.white : const Color(0xFF042F24),
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isCompleted ? const Color(0xFF1E3A2F) : const Color(0xFF00A86B),
-              foregroundColor: _isCompleted ? Colors.white : const Color(0xFF042F24),
+              backgroundColor: _isCompleted ? KikoColors.secondaryEmerald : KikoColors.primaryForest,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               elevation: 0,
@@ -526,18 +531,18 @@ class _LessonScreenState extends State<LessonScreen> {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2D36)),
+        border: Border.all(color: KikoColors.border),
       ),
       child: Column(
         children: const [
-          Icon(Icons.info_outline, size: 44, color: Color(0xFF94A3B8)),
+          Icon(Icons.info_outline, size: 44, color: KikoColors.textSecondary),
           SizedBox(height: 16),
           Text(
             'No Learning Content Available',
             style: TextStyle(
-              color: Colors.white,
+              color: KikoColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -547,7 +552,7 @@ class _LessonScreenState extends State<LessonScreen> {
             'The learning material for this lesson has not been added to the database yet. Please check back later.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color(0xFF94A3B8),
+              color: KikoColors.textSecondary,
               fontSize: 13,
               height: 1.5,
             ),
@@ -588,7 +593,7 @@ class _LessonScreenState extends State<LessonScreen> {
             child: Text(
               line.substring(2).trim(),
               style: const TextStyle(
-                color: Colors.white,
+                color: KikoColors.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 19,
               ),
@@ -624,7 +629,7 @@ class _LessonScreenState extends State<LessonScreen> {
             child: Text(
               headingText,
               style: const TextStyle(
-                color: Color(0xFF38BDF8),
+                color: KikoColors.primaryForest,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -643,7 +648,7 @@ class _LessonScreenState extends State<LessonScreen> {
             child: Text(
               line.substring(4).trim(),
               style: const TextStyle(
-                color: Color(0xFF00A86B),
+                color: KikoColors.secondaryEmerald,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -677,7 +682,7 @@ class _LessonScreenState extends State<LessonScreen> {
           child: Text(
             line,
             style: const TextStyle(
-              color: Color(0xFFCBD5E1),
+              color: KikoColors.textPrimary,
               fontSize: 14,
               height: 1.6,
             ),
@@ -698,9 +703,9 @@ class _LessonScreenState extends State<LessonScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2F38), width: 1.2),
+        border: Border.all(color: KikoColors.border, width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -709,14 +714,14 @@ class _LessonScreenState extends State<LessonScreen> {
             children: [
               const Icon(
                 Icons.check_circle_outline_rounded,
-                color: Color(0xFF00A86B),
+                color: KikoColors.secondaryEmerald,
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 heading,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: KikoColors.primaryForest,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -732,7 +737,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 children: [
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF00A86B),
+                    color: KikoColors.secondaryEmerald,
                     size: 16,
                   ),
                   const SizedBox(width: 10),
@@ -740,7 +745,7 @@ class _LessonScreenState extends State<LessonScreen> {
                     child: Text(
                       obj,
                       style: const TextStyle(
-                        color: Color(0xFFE2E8F0),
+                        color: KikoColors.textPrimary,
                         fontSize: 13,
                         height: 1.45,
                       ),
@@ -761,13 +766,13 @@ class _LessonScreenState extends State<LessonScreen> {
       children: [
         const Padding(
           padding: EdgeInsets.only(top: 6, right: 10),
-          child: Icon(Icons.circle, size: 6, color: Color(0xFF00A86B)),
+          child: Icon(Icons.circle, size: 6, color: KikoColors.secondaryEmerald),
         ),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
-              color: Color(0xFFE2E8F0),
+              color: KikoColors.textPrimary,
               fontSize: 14,
               height: 1.5,
             ),
@@ -780,9 +785,9 @@ class _LessonScreenState extends State<LessonScreen> {
   Widget _buildCodeBlock(String code, String language) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0B1317),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF1E2D36)),
+        border: Border.all(color: KikoColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -790,11 +795,14 @@ class _LessonScreenState extends State<LessonScreen> {
           // Code Header Bar with language tag & Copy action
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color(0xFF142026),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: KikoColors.hoverBackground,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(14),
                 topRight: Radius.circular(14),
+              ),
+              border: Border(
+                bottom: BorderSide(color: KikoColors.border),
               ),
             ),
             child: Row(
@@ -803,7 +811,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 Text(
                   language.toUpperCase(),
                   style: const TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: KikoColors.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -825,12 +833,12 @@ class _LessonScreenState extends State<LessonScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.copy, size: 13, color: Color(0xFF94A3B8)),
+                        Icon(Icons.copy, size: 13, color: KikoColors.textSecondary),
                         SizedBox(width: 4),
                         Text(
                           'Copy',
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: KikoColors.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
@@ -849,7 +857,7 @@ class _LessonScreenState extends State<LessonScreen> {
             child: Text(
               code,
               style: const TextStyle(
-                color: Color(0xFFE2E8F0),
+                color: KikoColors.textPrimary,
                 fontSize: 13,
                 fontFamily: 'monospace',
                 height: 1.5,
@@ -867,9 +875,9 @@ class _LessonScreenState extends State<LessonScreen> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF0F181D),
+        color: KikoColors.surface,
         border: Border(
-          top: BorderSide(color: Color(0xFF1E2D36), width: 1),
+          top: BorderSide(color: KikoColors.border, width: 1),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -881,14 +889,14 @@ class _LessonScreenState extends State<LessonScreen> {
             if (prev != null)
               OutlinedButton.icon(
                 onPressed: () => _fetchLesson(prev.id),
-                icon: const Icon(Icons.arrow_back, size: 14, color: Colors.white70),
+                icon: const Icon(Icons.arrow_back, size: 14, color: KikoColors.textPrimary),
                 label: Text(
                   'Lesson ${prev.orderNumber}',
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  style: const TextStyle(color: KikoColors.textPrimary, fontSize: 13),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF2E3E47)),
-                  backgroundColor: const Color(0xFF16232A),
+                  side: const BorderSide(color: KikoColors.border),
+                  backgroundColor: KikoColors.secondarySurface,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -899,18 +907,18 @@ class _LessonScreenState extends State<LessonScreen> {
               ElevatedButton.icon(
                 onPressed: () => _fetchLesson(next.id),
                 iconAlignment: IconAlignment.end,
-                icon: const Icon(Icons.arrow_forward, size: 14, color: Color(0xFF042F24)),
+                icon: const Icon(Icons.arrow_forward, size: 14, color: Colors.white),
                 label: Text(
                   'Next: Lesson ${next.orderNumber}',
                   style: const TextStyle(
-                    color: Color(0xFF042F24),
+                    color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00A86B),
-                  foregroundColor: const Color(0xFF042F24),
+                  backgroundColor: KikoColors.primaryForest,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,

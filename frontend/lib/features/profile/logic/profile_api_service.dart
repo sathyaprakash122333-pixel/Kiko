@@ -6,7 +6,7 @@ import '../../../core/config/api_config.dart';
 import '../../auth/logic/auth_service.dart';
 import '../models/user_profile.dart';
 
-/// Service responsible for fetching and updating user profiles from FastAPI
+/// Service responsible for fetching and updating user profiles and learning streaks from FastAPI
 class ProfileApiService {
   ProfileApiService({
     required this.authService,
@@ -25,7 +25,7 @@ class ProfileApiService {
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await authService.getIdToken();
     if (token == null || token.isEmpty) {
-      throw HttpException(
+      throw const HttpException(
         'Authentication token is unavailable. Please sign in to access your profile.',
       );
     }
@@ -66,17 +66,11 @@ class ProfileApiService {
         );
       }
     } on SocketException catch (e) {
-      throw Exception(
-        'Unable to connect to Kiko server at $baseUrl. ($e)',
-      );
+      throw Exception('Unable to connect to Kiko server at $baseUrl. ($e)');
     } on TimeoutException {
-      throw Exception(
-        'Connection timed out while loading user profile.',
-      );
+      throw Exception('Connection timed out while loading user profile.');
     } on http.ClientException catch (e) {
-      throw Exception(
-        'Network error while connecting to server: ${e.message}',
-      );
+      throw Exception('Network error while connecting to server: ${e.message}');
     } catch (e) {
       if (e is FormatException || e is HttpException) {
         rethrow;
@@ -85,7 +79,89 @@ class ProfileApiService {
     }
   }
 
-  /// Updates permitted profile fields (display name) via `PATCH /users/me`
+  /// Updates personal and academic profile fields via `PUT /users/me`
+  Future<UserProfile> updateProfile(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/users/me');
+
+    try {
+      final headers = await _getAuthHeaders();
+      final response = await _client
+          .put(
+            uri,
+            headers: headers,
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final dynamic decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          return UserProfile.fromJson(decoded);
+        }
+        throw const FormatException('Unexpected response format when updating profile.');
+      } else if (response.statusCode == 400) {
+        final dynamic decoded = jsonDecode(response.body);
+        final detail = decoded is Map<String, dynamic> ? decoded['detail'] : null;
+        throw HttpException(
+          detail?.toString() ?? 'Validation error while updating profile.',
+          uri: uri,
+        );
+      } else if (response.statusCode == 401) {
+        throw HttpException(
+          'Your session has expired. Please sign in again.',
+          uri: uri,
+        );
+      } else {
+        throw HttpException(
+          'Failed to update profile (status ${response.statusCode}): ${response.reasonPhrase}',
+          uri: uri,
+        );
+      }
+    } on SocketException catch (e) {
+      throw Exception('Unable to reach Kiko server at $baseUrl. ($e)');
+    } on TimeoutException {
+      throw Exception('Connection timed out while updating profile.');
+    } on http.ClientException catch (e) {
+      throw Exception('Network error while connecting to server: ${e.message}');
+    } catch (e) {
+      if (e is FormatException || e is HttpException) {
+        rethrow;
+      }
+      throw Exception('Failed to update profile: $e');
+    }
+  }
+
+  /// Fetches persistent daily learning streak data from `GET /users/me/streak`
+  Future<UserStreak> fetchStreak() async {
+    final uri = Uri.parse('$baseUrl/users/me/streak');
+
+    try {
+      final headers = await _getAuthHeaders();
+      final response = await _client
+          .get(uri, headers: headers)
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final dynamic decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          return UserStreak.fromJson(decoded);
+        }
+        return UserStreak.empty();
+      } else if (response.statusCode == 401) {
+        throw HttpException(
+          'Your session has expired. Please sign in again.',
+          uri: uri,
+        );
+      } else {
+        return UserStreak.empty();
+      }
+    } catch (_) {
+      // Return safe fallback empty streak if streak endpoint is unreachable
+      return UserStreak.empty();
+    }
+  }
+
+  /// Updates permitted profile fields (display name) via `PATCH /users/me` (backward compatibility)
   Future<UserProfile> updateDisplayName(String newDisplayName) async {
     final trimmed = newDisplayName.trim();
     if (trimmed.isEmpty) {
@@ -100,7 +176,7 @@ class ProfileApiService {
           .patch(
             uri,
             headers: headers,
-            body: jsonEncode({'display_name': trimmed}),
+            body: jsonEncode({'display_name': trimmed, 'full_name': trimmed}),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -122,17 +198,11 @@ class ProfileApiService {
         );
       }
     } on SocketException catch (e) {
-      throw Exception(
-        'Unable to reach Kiko server at $baseUrl. ($e)',
-      );
+      throw Exception('Unable to reach Kiko server at $baseUrl. ($e)');
     } on TimeoutException {
-      throw Exception(
-        'Connection timed out while updating profile.',
-      );
+      throw Exception('Connection timed out while updating profile.');
     } on http.ClientException catch (e) {
-      throw Exception(
-        'Network error while connecting to server: ${e.message}',
-      );
+      throw Exception('Network error while connecting to server: ${e.message}');
     } catch (e) {
       if (e is FormatException || e is HttpException) {
         rethrow;
@@ -141,3 +211,4 @@ class ProfileApiService {
     }
   }
 }
+

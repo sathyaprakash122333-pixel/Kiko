@@ -1,63 +1,113 @@
 import 'package:flutter/material.dart';
 
-/// Obsidian Kinetic Color Palette for Kiko
-/// Sourced directly from `design/stitch/stitch_kiko_gamified_learning_app_ui/obsidian_kinetic/DESIGN.md`
+/// Centralized Light Palette Design System for Kiko
+/// Palette Specification:
+/// - Background: #FFFFFF
+/// - Secondary surface: #F5F7F5
+/// - Primary forest green: #174D36
+/// - Secondary emerald: #27865A
+/// - Tertiary pale mint: #DDF4E5
+/// - Primary text: #26352D
+/// - Secondary text: #66756C
+/// - Borders: #E1E8E2
+/// - Hover background: #EDF5EF
+/// - Error: accessible dark red (#BA1A1A)
+/// - Success: readable green (#27865A)
 abstract final class KikoColors {
-  // Canvas & Surfaces
-  static const Color background = Color(0xFF111413);
-  static const Color surface = Color(0xFF111413);
-  static const Color surfaceDim = Color(0xFF111413);
-  static const Color surfaceBright = Color(0xFF373A39);
-  static const Color surfaceContainerLowest = Color(0xFF0C0F0E);
-  static const Color surfaceContainerLow = Color(0xFF191C1B);
-  static const Color surfaceContainer = Color(0xFF1D201F);
-  static const Color surfaceContainerHigh = Color(0xFF282B29);
-  static const Color surfaceContainerHighest = Color(0xFF323534);
+  // Pure canvas & secondary surface
+  static const Color background = Color(0xFFFFFFFF);
+  static const Color secondarySurface = Color(0xFFF5F7F5);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color card = Color(0xFFF5F7F5);
+
+  // Primary Actions: Forest Green
+  static const Color primaryForest = Color(0xFF174D36);
+  static const Color primary = Color(0xFF174D36);
+  static const Color onPrimary = Color(0xFFFFFFFF);
+
+  // Secondary & Progress: Emerald
+  static const Color secondaryEmerald = Color(0xFF27865A);
+  static const Color secondary = Color(0xFF27865A);
+  static const Color onSecondary = Color(0xFFFFFFFF);
+
+  // Tertiary & Highlights: Pale Mint
+  static const Color tertiaryMint = Color(0xFFDDF4E5);
+  static const Color tertiary = Color(0xFFDDF4E5);
+  static const Color onTertiary = Color(0xFF174D36);
 
   // Content & Text
-  static const Color onSurface = Color(0xFFE1E3E1);
-  static const Color onSurfaceVariant = Color(0xFFC4C9AE);
-  static const Color textHeadline = Color(0xFFF4F6F4);
-  static const Color textMuted = Color(0xFF8E9792);
-  static const Color textPlaceholder = Color(0xFF4C5550);
+  static const Color textPrimary = Color(0xFF26352D);
+  static const Color textSecondary = Color(0xFF66756C);
+  static const Color onSurface = Color(0xFF26352D);
+  static const Color onSurfaceVariant = Color(0xFF66756C);
+  static const Color textHeadline = Color(0xFF26352D);
+  static const Color textMuted = Color(0xFF66756C);
+  static const Color textPlaceholder = Color(0xFF8E9B93);
 
   // Structural Outlines & Dividers
-  static const Color outline = Color(0xFF8E937A);
-  static const Color outlineVariant = Color(0xFF434934);
-  static const Color hairline = Color(0x14FFFFFF); // rgba(255, 255, 255, 0.08)
-  static const Color subtleBorder = Color(0xFF2C322F);
+  static const Color border = Color(0xFFE1E8E2);
+  static const Color outline = Color(0xFFE1E8E2);
+  static const Color outlineVariant = Color(0xFFE1E8E2);
+  static const Color divider = Color(0xFFE1E8E2);
+  static const Color hairline = Color(0x1F26352D);
+  static const Color subtleBorder = Color(0xFFE1E8E2);
 
-  // Primary Accent: Piercing Electric Chartreuse / Lime
-  static const Color primary = Color(0xFFF9FFE0);
-  static const Color onPrimary = Color(0xFF273500);
-  static const Color primaryContainer = Color(0xFFBDF127);
-  static const Color onPrimaryContainer = Color(0xFF516B00);
-  static const Color primaryFixed = Color(0xFFC0F42B);
-  static const Color primaryFixedDim = Color(0xFFA6D700);
-  static const Color surfaceTint = Color(0xFFA6D700);
+  // Interactive states
+  static const Color hover = Color(0xFFEDF5EF);
+  static const Color hoverBackground = Color(0xFFEDF5EF);
 
-  // Tactile 3D Bevel Shadows
-  static const Color tactileShadowPrimary = Color(0xFF516B00);
-  static const Color tactileShadowLime = Color(0xFF8EBD05);
+  // Semantic Alerts & Statuses
+  static const Color error = Color(0xFFBA1A1A);
+  static const Color onError = Color(0xFFFFFFFF);
+  static const Color errorContainer = Color(0xFFFFDAD6);
+  static const Color onErrorContainer = Color(0xFF410002);
 
-  // Secondary
-  static const Color secondary = Color(0xFFC4C7C4);
-  static const Color onSecondary = Color(0xFF2D312F);
-  static const Color secondaryContainer = Color(0xFF444845);
-  static const Color onSecondaryContainer = Color(0xFFB2B6B3);
+  static const Color success = Color(0xFF27865A);
+  static const Color onSuccess = Color(0xFFFFFFFF);
+  static const Color successContainer = Color(0xFFDDF4E5);
+  static const Color onSuccessContainer = Color(0xFF0F3826);
 
-  // Tertiary
-  static const Color tertiary = Color(0xFFF8FEF9);
-  static const Color onTertiary = Color(0xFF2C322F);
-  static const Color tertiaryContainer = Color(0xFFDBE1DC);
+  static const Color warning = Color(0xFFB45309);
+  static const Color warningContainer = Color(0xFFFEF3C7);
+
+  // Material 3 Surface Containers remapped to light palette
+  static const Color surfaceDim = Color(0xFFF5F7F5);
+  static const Color surfaceBright = Color(0xFFFFFFFF);
+  static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color surfaceContainerLow = Color(0xFFF5F7F5);
+  static const Color surfaceContainer = Color(0xFFF5F7F5);
+  static const Color surfaceContainerHigh = Color(0xFFEDF1EE);
+  static const Color surfaceContainerHighest = Color(0xFFE1E8E2);
+
+  // Primary Containers & Tactile button accents
+  static const Color primaryContainer = Color(0xFFDDF4E5);
+  static const Color onPrimaryContainer = Color(0xFF174D36);
+  static const Color primaryFixed = Color(0xFF174D36);
+  static const Color primaryFixedDim = Color(0xFF27865A);
+  static const Color surfaceTint = Color(0xFF174D36);
+  static const Color tactileShadowPrimary = Color(0xFF0D3222);
+  static const Color tactileShadowLime = Color(0xFF1B593C);
+
+  // Secondary Containers
+  static const Color secondaryContainer = Color(0xFFEDF5EF);
+  static const Color onSecondaryContainer = Color(0xFF26352D);
+
+  // Tertiary Containers
+  static const Color tertiaryContainer = Color(0xFFDDF4E5);
 
   // Inverse
-  static const Color inverseSurface = Color(0xFFE1E3E1);
-  static const Color inverseOnSurface = Color(0xFF2E3130);
+  static const Color inverseSurface = Color(0xFF26352D);
+  static const Color inverseOnSurface = Color(0xFFFFFFFF);
 
-  // Alerts & Errors
-  static const Color error = Color(0xFFFFB4AB);
-  static const Color onError = Color(0xFF690005);
-  static const Color errorContainer = Color(0xFF93000A);
-  static const Color onErrorContainer = Color(0xFFFFDAD6);
+  // Brand aliases remapped to light theme
+  static const Color forestBackground = Color(0xFFFFFFFF);
+  static const Color forestSecondary = Color(0xFFF5F7F5);
+  static const Color forestSurface = Color(0xFFF5F7F5);
+  static const Color vibrantLime = Color(0xFF174D36);
+  static const Color softMint = Color(0xFF27865A);
+  static const Color warmWhite = Color(0xFFFFFFFF);
+  static const Color mutedMintGray = Color(0xFF66756C);
+  static const Color darkMintBorder = Color(0xFFE1E8E2);
+  static const Color darkMintDivider = Color(0x33174D36);
 }
+

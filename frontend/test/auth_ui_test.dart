@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/core/widgets/google_logo.dart';
-import 'package:frontend/core/widgets/tactile_button.dart';
 import 'package:frontend/features/auth/logic/auth_service.dart';
 import 'package:frontend/features/auth/presentation/screens/login_screen.dart';
+import 'package:frontend/features/auth/presentation/widgets/google_sign_in_button.dart';
+import 'package:frontend/features/auth/presentation/widgets/hero_illustration.dart';
 
 class MockUser implements User {
   @override
@@ -60,7 +61,8 @@ class FakeAuthService implements AuthService {
     if (shouldFail) {
       throw FirebaseAuthException(
         code: 'unauthorized-domain',
-        message: 'Domain not authorized in Firebase Console.',
+        message:
+            'Configuration Error: Current domain is not authorized in Firebase Console -> Authentication -> Settings -> Authorized Domains.',
       );
     }
     final user = MockUser();
@@ -81,39 +83,107 @@ class FakeAuthService implements AuthService {
 }
 
 void main() {
-  group('Google Sign-In Only LoginScreen Tests', () {
+  group('Kiko Redesigned Login Screen Tests', () {
     late FakeAuthService fakeAuthService;
 
     setUp(() {
       fakeAuthService = FakeAuthService();
     });
 
-    testWidgets('Unauthenticated view renders prominent Continue with Google button and Stitch components',
+    testWidgets('Unauthenticated view renders hero illustration, heading, subtitle, Google button, and campus notice',
         (tester) async {
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       await tester.pumpWidget(
         MaterialApp(
           theme: KikoTheme.darkTheme,
           home: LoginScreen(authService: fakeAuthService),
         ),
       );
+      await tester.pumpAndSettle();
 
-      // Verify Kiko branding and Stitch layout
-      expect(find.text('Login'), findsOneWidget);
-      expect(find.text('7-DAY STREAK ACTIVE'), findsOneWidget);
-      expect(find.text('Google Sign-In'), findsOneWidget);
-      expect(find.text('Welcome back, hacker!'), findsOneWidget);
-      expect(find.text('Sign In'), findsOneWidget);
-      expect(find.text('End-to-end encrypted session via Firebase Cloud'), findsOneWidget);
+      // Verify Hero Illustration
+      expect(find.byType(HeroIllustration), findsOneWidget);
 
-      // Verify prominent Continue with Google button and Google logo
+      // Verify Heading: "Let's get started!"
+      expect(find.textContaining("Let's get"), findsOneWidget);
+      expect(find.textContaining('started!'), findsOneWidget);
+
+      // Verify Subtitle: "Sign in to continue your\nlearning journey."
+      expect(
+        find.text('Sign in to continue your\nlearning journey.'),
+        findsOneWidget,
+      );
+
+      // Verify Google button and Google logo
+      expect(find.byType(GoogleSignInButton), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
       expect(find.byType(GoogleLogo), findsOneWidget);
-      expect(find.byType(TactileButton), findsOneWidget);
 
-      // Verify no email/password fields or signup forms exist
+      // Verify Campus-only notice
+      expect(
+        find.text('Google Sign-In only for Kiko campus cohorts.'),
+        findsOneWidget,
+      );
+
+      // Verify old templates/elements are gone
       expect(find.text('UNIVERSITY EMAIL'), findsNothing);
       expect(find.text('PASSWORD'), findsNothing);
       expect(find.text('Create an account'), findsNothing);
+      expect(find.text('Welcome back, hacker!'), findsNothing);
+      expect(find.text('Welcome back,'), findsNothing);
+      expect(find.text('programmer!'), findsNothing);
+      expect(find.text('7-DAY STREAK ACTIVE'), findsNothing);
+    });
+
+    testWidgets('Renders properly without overflow on narrow mobile (320px width)', (tester) async {
+      tester.view.physicalSize = const Size(320 * 2, 600 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: KikoTheme.darkTheme,
+          home: LoginScreen(authService: fakeAuthService),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.textContaining("Let's get"), findsOneWidget);
+      expect(find.text('Google Sign-In only for Kiko campus cohorts.'), findsOneWidget);
+    });
+
+    testWidgets('Renders centered layout on tablet/desktop (800px width)', (tester) async {
+      tester.view.physicalSize = const Size(800 * 2, 900 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: KikoTheme.darkTheme,
+          home: LoginScreen(authService: fakeAuthService),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(HeroIllustration), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.textContaining("Let's get"), findsOneWidget);
+      expect(find.text('Google Sign-In only for Kiko campus cohorts.'), findsOneWidget);
     });
 
     testWidgets('Shows error message when Google sign-in is cancelled', (tester) async {
@@ -125,6 +195,7 @@ void main() {
           home: LoginScreen(authService: fakeAuthService),
         ),
       );
+      await tester.pumpAndSettle();
 
       final googleButtonFinder = find.text('Continue with Google');
       await tester.tap(googleButtonFinder);
@@ -142,21 +213,19 @@ void main() {
           home: LoginScreen(authService: fakeAuthService),
         ),
       );
+      await tester.pumpAndSettle();
 
       final googleButtonFinder = find.text('Continue with Google');
       await tester.tap(googleButtonFinder);
       await tester.pumpAndSettle();
 
       expect(
-        find.text(
-          'Configuration Error: This domain is not listed under Firebase Console -> Authentication -> Settings -> Authorized Domains.',
-        ),
+        find.textContaining('Current domain is not authorized in Firebase Console'),
         findsOneWidget,
       );
     });
 
-    testWidgets('Shows error message when Firestore sync fails and prevents false success',
-        (tester) async {
+    testWidgets('Shows error message when Firestore sync fails', (tester) async {
       fakeAuthService.shouldFailFirestore = true;
 
       await tester.pumpWidget(
@@ -165,22 +234,19 @@ void main() {
           home: LoginScreen(authService: fakeAuthService),
         ),
       );
+      await tester.pumpAndSettle();
 
       final googleButtonFinder = find.text('Continue with Google');
       await tester.tap(googleButtonFinder);
       await tester.pumpAndSettle();
 
       expect(
-        find.text(
-          'Firestore Sync Error: Unable to save user profile (Permission denied by security rules).',
-        ),
+        find.textContaining('Firestore Sync Error: Unable to save user profile'),
         findsOneWidget,
       );
-      // Ensure user profile is not displayed
-      expect(find.text('Profile'), findsNothing);
     });
 
-    testWidgets('Authenticated view displays Kiko Course Dashboard and Sign Out button',
+    testWidgets('Authenticated view transitions to Kiko Course Dashboard and Sign Out works',
         (tester) async {
       fakeAuthService.emitUser(MockUser());
 

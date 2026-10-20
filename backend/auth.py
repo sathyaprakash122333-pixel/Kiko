@@ -8,21 +8,13 @@ import firebase_admin
 from firebase_admin import auth as firebase_auth, credentials
 from sqlalchemy.orm import Session
 
-from database import SessionLocal
-from models import User
+from database import SessionLocal, get_db
+from models import User, UserProfile
 
 logger = logging.getLogger("kiko.auth")
 
 # HTTP Bearer scheme
 bearer_scheme = HTTPBearer(auto_error=False)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def initialize_firebase_app():
@@ -52,7 +44,14 @@ def verify_firebase_token(token: str) -> dict:
     """
     initialize_firebase_app()
 
-    dev_mode = os.getenv("KIKO_AUTH_DEV_MODE", "false").lower() in ("true", "1", "yes")
+    is_prod = (
+        os.getenv("ENVIRONMENT", "").lower() in ("production", "prod")
+        or bool(os.getenv("RENDER"))
+    )
+    dev_mode = (
+        not is_prod
+        and os.getenv("KIKO_AUTH_DEV_MODE", "false").lower() in ("true", "1", "yes")
+    )
     if dev_mode and token.startswith("dev:"):
         dev_uid = token.split("dev:", 1)[1].strip()
         if not dev_uid:
@@ -114,22 +113,34 @@ def get_current_user(
 
     now = datetime.now(timezone.utc)
 
-    # Sync user in local database
+    # Sync user and profile atomically in local database
     user = db.query(User).filter(User.firebase_uid == uid).first()
     if not user:
-        user = User(
-            firebase_uid=uid,
-            email=token_data.get("email"),
-            display_name=token_data.get("name"),
-            created_at=now,
-            last_login_at=now,
-        )
-        db.add(user)
         try:
+            user = User(
+                firebase_uid=uid,
+                email=token_data.get("email"),
+                display_name=token_data.get("name"),
+                created_at=now,
+                last_login_at=now,
+            )
+            db.add(user)
+            db.flush()
+
+            profile = UserProfile(
+                user_id=user.id,
+                firebase_uid=user.firebase_uid,
+                email=user.email,
+                full_name=user.display_name,
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(profile)
             db.commit()
             db.refresh(user)
-        except Exception:
+        except Exception as exc:
             db.rollback()
+            logger.error("Failed to register user and profile atomically: %s", exc)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to register user in database",
@@ -143,10 +154,27 @@ def get_current_user(
             user.email = new_email
         if new_name and not user.display_name:
             user.display_name = new_name
+
+        # Ensure profile exists without overwriting existing profile data
+        profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+        if not profile:
+            profile = UserProfile(
+                user_id=user.id,
+                firebase_uid=user.firebase_uid,
+                email=user.email,
+                full_name=user.display_name,
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(profile)
+
         try:
             db.commit()
             db.refresh(user)
-        except Exception:
+        except Exception as exc:
             db.rollback()
+            logger.error("Failed to update user login: %s", exc)
 
     return user
+
+

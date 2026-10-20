@@ -33,7 +33,7 @@ class KikoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kiko',
       debugShowCheckedModeBanner: false,
-      theme: KikoTheme.darkTheme,
+      theme: KikoTheme.lightTheme,
       home: LoginScreen(authService: auth),
       routes: {
         '/login': (context) => LoginScreen(authService: auth),

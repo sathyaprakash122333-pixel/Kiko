@@ -32,6 +32,77 @@ class User(Base):
     exam_attempts: Mapped[list["ExamAttempt"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    profile: Mapped["UserProfile | None"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    learning_activities: Mapped[list["UserLearningActivity"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True, nullable=False
+    )
+    firebase_uid: Mapped[str] = mapped_column(
+        String(128), unique=True, index=True, nullable=False
+    )
+    email: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    full_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    date_of_birth: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    institution: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    degree: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    department: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    academic_year: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    semester: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    user: Mapped["User"] = relationship(back_populates="profile")
+
+
+class UserLearningActivity(Base):
+    __tablename__ = "user_learning_activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    firebase_uid: Mapped[str] = mapped_column(
+        String(128), index=True, nullable=False
+    )
+    activity_date: Mapped[str] = mapped_column(
+        String(10), index=True, nullable=False
+    )
+    activity_type: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )
+    entity_id: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+    user: Mapped["User"] = relationship(back_populates="learning_activities")
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "activity_date", "activity_type", "entity_id", name="uq_user_daily_activity"),
+    )
+
 
 
 class Course(Base):
@@ -61,7 +132,7 @@ class Lesson(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     course_id: Mapped[int] = mapped_column(
-        ForeignKey("courses.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("courses.id", ondelete="CASCADE"), index=True, nullable=False
     )
     title: Mapped[str] = mapped_column(String(150), nullable=False)
     content: Mapped[str] = mapped_column(Text, default="")
@@ -135,7 +206,7 @@ class ExamQuestion(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     exam_id: Mapped[int] = mapped_column(
-        ForeignKey("exams.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("exams.id", ondelete="CASCADE"), index=True, nullable=False
     )
     question_text: Mapped[str] = mapped_column(Text, nullable=False)
     # Options stored as JSON string (list of options)
@@ -158,10 +229,10 @@ class ExamAttempt(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
     exam_id: Mapped[int] = mapped_column(
-        ForeignKey("exams.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("exams.id", ondelete="CASCADE"), index=True, nullable=False
     )
     score: Mapped[int] = mapped_column(Integer, default=0)
     total_questions: Mapped[int] = mapped_column(Integer, default=0)

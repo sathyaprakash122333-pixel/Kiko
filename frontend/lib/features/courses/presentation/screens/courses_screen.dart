@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/kiko_app_shell.dart';
 import '../../../../core/widgets/kiko_top_header.dart';
@@ -10,6 +11,7 @@ import '../../models/user_progress.dart';
 import 'course_detail_screen.dart';
 
 /// Courses Page displaying catalog of courses with real completion progress
+/// Redesigned to centralized Light Theme with clean educational line iconography (no mascot).
 class CoursesScreen extends StatefulWidget {
   const CoursesScreen({
     super.key,
@@ -88,7 +90,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
+          _errorMessage =
+              e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
           _isLoading = false;
         });
       }
@@ -115,12 +118,15 @@ class _CoursesScreenState extends State<CoursesScreen> {
       final title = course.title.toLowerCase();
       final desc = course.description.toLowerCase();
       final lang = course.language.toLowerCase();
-      return title.contains(query) || desc.contains(query) || lang.contains(query);
+      return title.contains(query) ||
+          desc.contains(query) ||
+          lang.contains(query);
     }).toList();
   }
 
   double _getCourseProgress(int courseId) {
-    final match = _userProgress.courseProgress.where((cp) => cp.courseId == courseId);
+    final match =
+        _userProgress.courseProgress.where((cp) => cp.courseId == courseId);
     if (match.isNotEmpty) {
       return match.first.completionPercentage;
     }
@@ -128,7 +134,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
   }
 
   int _getCompletedLessons(int courseId) {
-    final match = _userProgress.courseProgress.where((cp) => cp.courseId == courseId);
+    final match =
+        _userProgress.courseProgress.where((cp) => cp.courseId == courseId);
     if (match.isNotEmpty) {
       return match.first.completedLessons;
     }
@@ -141,7 +148,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
       currentTab: KikoTab.courses,
       authService: _authService,
       user: widget.user,
-      child: _buildBody(),
+      child: Scaffold(
+        backgroundColor: KikoColors.background,
+        body: _buildBody(),
+      ),
     );
   }
 
@@ -149,7 +159,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+          valueColor: AlwaysStoppedAnimation<Color>(KikoColors.primaryForest),
         ),
       );
     }
@@ -161,25 +171,41 @@ class _CoursesScreenState extends State<CoursesScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Color(0xFFEF4444)),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: KikoColors.error,
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Unable to Load Courses',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: KikoColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 _errorMessage!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                style: const TextStyle(
+                  color: KikoColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E2F38),
+                  backgroundColor: KikoColors.primaryForest,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onPressed: _loadData,
                 icon: const Icon(Icons.refresh, size: 18),
@@ -201,14 +227,15 @@ class _CoursesScreenState extends State<CoursesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Mobile Top Header Bar
+              // Standard Top Header Bar
               KikoTopHeader(
                 authService: _authService,
                 user: widget.user,
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -216,7 +243,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     Text(
                       'Your Courses',
                       style: KikoTypography.headlineMd(
-                        color: Colors.white,
+                        color: KikoColors.textPrimary,
                         fontWeight: FontWeight.bold,
                       ).copyWith(fontSize: 22, letterSpacing: -0.4),
                     ),
@@ -224,7 +251,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     const Text(
                       'Explore our beginner-friendly courses and start your coding journey today.',
                       style: TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: KikoColors.textSecondary,
                         fontSize: 13,
                         height: 1.4,
                       ),
@@ -238,21 +265,36 @@ class _CoursesScreenState extends State<CoursesScreen> {
                           child: Container(
                             height: 44,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF121E24),
+                              color: KikoColors.secondarySurface,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF1E2F38)),
+                              border: Border.all(color: KikoColors.border),
                             ),
                             child: TextField(
                               controller: _searchController,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
-                              onChanged: (val) => setState(() => _searchQuery = val),
+                              style: const TextStyle(
+                                color: KikoColors.textPrimary,
+                                fontSize: 13,
+                              ),
+                              onChanged: (val) =>
+                                  setState(() => _searchQuery = val),
                               decoration: InputDecoration(
                                 hintText: 'Search courses...',
-                                hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                                prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B), size: 19),
+                                hintStyle: const TextStyle(
+                                  color: KikoColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: KikoColors.textSecondary,
+                                  size: 19,
+                                ),
                                 suffixIcon: _searchQuery.isNotEmpty
                                     ? IconButton(
-                                        icon: const Icon(Icons.clear, color: Color(0xFF64748B), size: 16),
+                                        icon: const Icon(
+                                          Icons.clear,
+                                          color: KikoColors.textSecondary,
+                                          size: 16,
+                                        ),
                                         onPressed: () {
                                           _searchController.clear();
                                           setState(() => _searchQuery = '');
@@ -261,7 +303,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
                                     : null,
                                 border: InputBorder.none,
                                 isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
                               ),
                             ),
                           ),
@@ -301,30 +346,39 @@ class _CoursesScreenState extends State<CoursesScreen> {
   Widget _buildFilterDropdown() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121D23),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF263844)),
+        border: Border.all(color: KikoColors.border),
       ),
       child: PopupMenuButton<String>(
         initialValue: _selectedFilter,
-        color: const Color(0xFF152229),
+        color: KikoColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF283B47)),
+          side: const BorderSide(color: KikoColors.border),
         ),
         onSelected: (val) => setState(() => _selectedFilter = val),
         itemBuilder: (context) => [
           const PopupMenuItem(
             value: 'All courses',
-            child: Text('All courses', style: TextStyle(color: Colors.white, fontSize: 13)),
+            child: Text(
+              'All courses',
+              style: TextStyle(color: KikoColors.textPrimary, fontSize: 13),
+            ),
           ),
           const PopupMenuItem(
             value: 'C Language',
-            child: Text('C Language', style: TextStyle(color: Colors.white, fontSize: 13)),
+            child: Text(
+              'C Language',
+              style: TextStyle(color: KikoColors.textPrimary, fontSize: 13),
+            ),
           ),
           const PopupMenuItem(
             value: 'Python',
-            child: Text('Python', style: TextStyle(color: Colors.white, fontSize: 13)),
+            child: Text(
+              'Python',
+              style: TextStyle(color: KikoColors.textPrimary, fontSize: 13),
+            ),
           ),
         ],
         child: Padding(
@@ -335,13 +389,17 @@ class _CoursesScreenState extends State<CoursesScreen> {
               Text(
                 _selectedFilter,
                 style: const TextStyle(
-                  color: Color(0xFFE2E8F0),
+                  color: KikoColors.textPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF94A3B8)),
+              const Icon(
+                Icons.keyboard_arrow_down,
+                size: 18,
+                color: KikoColors.textSecondary,
+              ),
             ],
           ),
         ),
@@ -352,15 +410,23 @@ class _CoursesScreenState extends State<CoursesScreen> {
   Widget _buildCourseCard(Course course, double progress) {
     final isC = course.language.toLowerCase().contains('c') &&
         !course.language.toLowerCase().contains('python');
-    final badgeColor = isC ? const Color(0xFF1D4ED8) : const Color(0xFF0284C7);
-    final badgeBorder = isC ? const Color(0xFF3B82F6) : const Color(0xFF38BDF8);
+    final badgeColor = isC ? const Color(0xFF2563EB) : const Color(0xFF0D9488);
+    final badgeBg = isC ? const Color(0xFFEFF6FF) : const Color(0xFFF0FDFA);
+    final badgeBorder = isC ? const Color(0xFFBFDBFE) : const Color(0xFF99F6E4);
     final badgeText = isC ? 'C Language' : 'Python';
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF1E2F38), width: 1.2),
+        border: Border.all(color: KikoColors.border, width: 1.2),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0626352D),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -378,6 +444,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
             );
           },
           borderRadius: BorderRadius.circular(18),
+          hoverColor: KikoColors.hover,
           child: Padding(
             padding: const EdgeInsets.all(22),
             child: Column(
@@ -391,15 +458,15 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.25),
+                        color: badgeBg,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: badgeBorder.withValues(alpha: 0.6)),
+                        border: Border.all(color: badgeBorder),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         isC ? 'C' : 'Py',
                         style: TextStyle(
-                          color: badgeBorder,
+                          color: badgeColor,
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                           fontFamily: 'monospace',
@@ -407,16 +474,19 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.15),
+                        color: badgeBg,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: badgeBorder.withValues(alpha: 0.5)),
+                        border: Border.all(color: badgeBorder),
                       ),
                       child: Text(
                         badgeText,
                         style: TextStyle(
-                          color: badgeBorder,
+                          color: badgeColor,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -431,7 +501,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 Text(
                   course.title,
                   style: KikoTypography.headlineMd(
-                    color: Colors.white,
+                    color: KikoColors.textPrimary,
                     fontWeight: FontWeight.bold,
                   ).copyWith(fontSize: 19),
                 ),
@@ -442,7 +512,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 Text(
                   course.description,
                   style: const TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: KikoColors.textSecondary,
                     fontSize: 13,
                     height: 1.45,
                   ),
@@ -450,7 +520,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
                 const SizedBox(height: 18),
 
-                // Middle Row: Metrics & Turtle Artwork
+                // Middle Row: Metrics & Line Art (Turtle mascot removed)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -461,23 +531,31 @@ class _CoursesScreenState extends State<CoursesScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.menu_book_outlined, size: 16, color: Color(0xFF94A3B8)),
+                              const Icon(
+                                Icons.menu_book_outlined,
+                                size: 16,
+                                color: KikoColors.textSecondary,
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 '${course.lessonCount > 0 ? course.lessonCount : 10} lessons',
                                 style: const TextStyle(
-                                  color: Color(0xFFCBD5E1),
+                                  color: KikoColors.textSecondary,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              const Icon(Icons.schedule, size: 16, color: Color(0xFF94A3B8)),
+                              const Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: KikoColors.textSecondary,
+                              ),
                               const SizedBox(width: 6),
                               const Text(
                                 '~ 20-25 hrs',
                                 style: TextStyle(
-                                  color: Color(0xFFCBD5E1),
+                                  color: KikoColors.textSecondary,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -493,7 +571,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                               Text(
                                 '${_getCompletedLessons(course.id)} / ${course.lessonCount} lessons completed',
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: KikoColors.textSecondary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -501,7 +579,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                               Text(
                                 '${progress.toInt()}%',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: KikoColors.textPrimary,
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -515,8 +593,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
                             borderRadius: BorderRadius.circular(6),
                             child: LinearProgressIndicator(
                               value: (progress / 100.0).clamp(0.0, 1.0),
-                              backgroundColor: const Color(0xFF18262E),
-                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+                              backgroundColor: const Color(0xFFE2E8F0),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                KikoColors.secondaryEmerald,
+                              ),
                               minHeight: 6,
                             ),
                           ),
@@ -526,18 +606,22 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
                     const SizedBox(width: 16),
 
-                    // Right Mascot with Laptop
-                    SizedBox(
-                      width: 82,
-                      height: 82,
-                      child: Image.asset(
-                        'assets/images/tofu_mascot.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.laptop_chromebook,
-                          size: 48,
-                          color: Color(0xFF00A86B),
+                    // Clean circular icon badge (Replacing turtle mascot with laptop)
+                    Container(
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: KikoColors.tertiaryMint,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: KikoColors.border,
                         ),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.laptop_chromebook_rounded,
+                        size: 26,
+                        color: KikoColors.primaryForest,
                       ),
                     ),
                   ],
@@ -550,10 +634,12 @@ class _CoursesScreenState extends State<CoursesScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00A86B),
-                      foregroundColor: const Color(0xFF052E16),
+                      backgroundColor: KikoColors.primaryForest,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     onPressed: () async {
@@ -577,13 +663,17 @@ class _CoursesScreenState extends State<CoursesScreen> {
                         Text(
                           progress > 0 ? 'Continue learning' : 'View course',
                           style: const TextStyle(
-                            color: Color(0xFF052E16),
+                            color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Icon(Icons.arrow_forward, size: 16, color: Color(0xFF052E16)),
+                        const Icon(
+                          Icons.arrow_forward,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
                   ),
@@ -601,22 +691,33 @@ class _CoursesScreenState extends State<CoursesScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(36),
       decoration: BoxDecoration(
-        color: const Color(0xFF121E24),
+        color: KikoColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E2F38)),
+        border: Border.all(color: KikoColors.border),
       ),
       child: Column(
         children: [
-          const Icon(Icons.search_off, size: 48, color: Color(0xFF64748B)),
+          const Icon(
+            Icons.search_off,
+            size: 48,
+            color: KikoColors.textSecondary,
+          ),
           const SizedBox(height: 14),
           const Text(
             'No Courses Found',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: KikoColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 6),
           const Text(
             'Try adjusting your search query or language filter.',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+            style: TextStyle(
+              color: KikoColors.textSecondary,
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 16),
           TextButton(
@@ -627,7 +728,13 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 _selectedFilter = 'All courses';
               });
             },
-            child: const Text('Reset Filters', style: TextStyle(color: Color(0xFF00A86B))),
+            child: const Text(
+              'Reset Filters',
+              style: TextStyle(
+                color: KikoColors.primaryForest,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

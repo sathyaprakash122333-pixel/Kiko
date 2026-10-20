@@ -21,21 +21,99 @@ class UserResponse(UserBase):
 
 class UserProfileResponse(BaseModel):
     id: int
+    user_id: int | None = None
     firebase_uid: str
     email: str | None = None
     display_name: str | None = None
+    full_name: str | None = None
+    date_of_birth: str | None = None
+    gender: str | None = None
+    city: str | None = None
+    institution: str | None = None
+    degree: str | None = None
+    department: str | None = None
+    academic_year: str | None = None
+    semester: str | None = None
     created_at: datetime
+    updated_at: datetime | None = None
     last_login_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserProfileDetailResponse(UserProfileResponse):
+    pass
+
+
 class UserProfileUpdateRequest(BaseModel):
-    display_name: str = Field(
+    display_name: str | None = Field(
+        None,
         min_length=1,
-        max_length=120,
+        max_length=150,
         description="Updated display name",
     )
+    full_name: str | None = Field(
+        None,
+        min_length=1,
+        max_length=150,
+        description="Updated full name",
+    )
+    date_of_birth: str | None = Field(
+        None,
+        max_length=30,
+        description="Date of birth (ISO or formatted string)",
+    )
+    gender: str | None = Field(
+        None,
+        max_length=50,
+        description="Gender selection",
+    )
+    city: str | None = Field(
+        None,
+        max_length=100,
+        description="City of residence",
+    )
+    institution: str | None = Field(
+        None,
+        max_length=200,
+        description="College or institution name",
+    )
+    degree: str | None = Field(
+        None,
+        max_length=150,
+        description="Degree or course of study",
+    )
+    department: str | None = Field(
+        None,
+        max_length=150,
+        description="Academic department",
+    )
+    academic_year: str | None = Field(
+        None,
+        max_length=50,
+        description="Current academic year (e.g. 3rd Year)",
+    )
+    semester: str | None = Field(
+        None,
+        max_length=50,
+        description="Current semester (e.g. 5th Semester)",
+    )
+
+
+class UserProfileUpdatePayload(UserProfileUpdateRequest):
+    pass
+
+
+class UserStreakResponse(BaseModel):
+    current_streak: int
+    longest_streak: int
+    last_activity_date: str | None = None
+    active_today: bool
+    total_active_days: int
+    recent_active_dates: list[str] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 # ---------------------------------------------------------------------------

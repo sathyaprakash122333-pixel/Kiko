@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../auth/logic/auth_service.dart';
 import '../../logic/course_api_service.dart';
@@ -96,23 +97,23 @@ class _TestScreenState extends State<TestScreen> {
       context: context,
       barrierDismissible: !_isSubmitting,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161F24),
+        backgroundColor: KikoColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF2A3D48)),
+          side: const BorderSide(color: KikoColors.border),
         ),
         title: Row(
           children: [
             Icon(
               isIncomplete ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-              color: isIncomplete ? const Color(0xFFFBBF24) : const Color(0xFF34D399),
+              color: isIncomplete ? const Color(0xFFD97706) : KikoColors.secondaryEmerald,
               size: 24,
             ),
             const SizedBox(width: 10),
             Text(
               isIncomplete ? 'Incomplete Assessment' : 'Submit Assessment',
               style: KikoTypography.headlineMd(
-                color: Colors.white,
+                color: KikoColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ).copyWith(fontSize: 18),
             ),
@@ -123,7 +124,7 @@ class _TestScreenState extends State<TestScreen> {
               ? 'You have answered $answeredCount of $totalQuestions questions.\n\nUnanswered questions will be scored as 0. Are you sure you want to submit now?'
               : 'You have answered all $totalQuestions questions.\n\nReady to submit for final evaluation?',
           style: const TextStyle(
-            color: Color(0xFF94A3B8),
+            color: KikoColors.textSecondary,
             fontSize: 14,
             height: 1.5,
           ),
@@ -133,12 +134,12 @@ class _TestScreenState extends State<TestScreen> {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text(
               'Review Answers',
-              style: TextStyle(color: Color(0xFF94A3B8)),
+              style: TextStyle(color: KikoColors.textSecondary),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isIncomplete ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
+              backgroundColor: isIncomplete ? const Color(0xFFD97706) : KikoColors.primaryForest,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -187,7 +188,7 @@ class _TestScreenState extends State<TestScreen> {
         final errText = e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: const Color(0xFFDC2626),
+            backgroundColor: KikoColors.error,
             content: Text('Failed to submit test: $errText'),
             action: SnackBarAction(
               label: 'Retry',
@@ -203,12 +204,16 @@ class _TestScreenState extends State<TestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1317),
+      backgroundColor: KikoColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF10181C),
+        backgroundColor: KikoColors.surface,
         elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: KikoColors.border, height: 1),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close, color: KikoColors.textPrimary),
           tooltip: 'Exit Assessment',
           onPressed: _isSubmitting
               ? null
@@ -220,27 +225,27 @@ class _TestScreenState extends State<TestScreen> {
                   final leave = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      backgroundColor: const Color(0xFF161F24),
+                      backgroundColor: KikoColors.surface,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
-                        side: const BorderSide(color: Color(0xFF2A3D48)),
+                        side: const BorderSide(color: KikoColors.border),
                       ),
                       title: const Text(
                         'Leave Assessment?',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: KikoColors.textPrimary, fontWeight: FontWeight.bold),
                       ),
                       content: const Text(
                         'Your progress on this test attempt will not be saved if you leave now.',
-                        style: TextStyle(color: Color(0xFF94A3B8)),
+                        style: TextStyle(color: KikoColors.textSecondary),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(ctx).pop(false),
-                          child: const Text('Stay', style: TextStyle(color: Color(0xFF34D399))),
+                          child: const Text('Stay', style: TextStyle(color: KikoColors.primaryForest)),
                         ),
                         TextButton(
                           onPressed: () => Navigator.of(ctx).pop(true),
-                          child: const Text('Leave', style: TextStyle(color: Color(0xFFEF4444))),
+                          child: const Text('Leave', style: TextStyle(color: KikoColors.error)),
                         ),
                       ],
                     ),
@@ -253,7 +258,7 @@ class _TestScreenState extends State<TestScreen> {
         title: const Text(
           'Course Test',
           style: TextStyle(
-            color: Colors.white,
+            color: KikoColors.textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
@@ -266,14 +271,14 @@ class _TestScreenState extends State<TestScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1B2A32),
+                    color: KikoColors.tertiaryMint,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF2E434F)),
+                    border: Border.all(color: KikoColors.secondaryEmerald.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     '${_selectedAnswers.length}/${_exam!.questions.length} answered',
                     style: const TextStyle(
-                      color: Color(0xFF34D399),
+                      color: KikoColors.primaryForest,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -296,11 +301,11 @@ class _TestScreenState extends State<TestScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Color(0xFF34D399)),
+            CircularProgressIndicator(color: KikoColors.primaryForest),
             SizedBox(height: 16),
             Text(
               'Loading course assessment...',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+              style: TextStyle(color: KikoColors.textSecondary, fontSize: 14),
             ),
           ],
         ),
@@ -314,24 +319,25 @@ class _TestScreenState extends State<TestScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Color(0xFFEF4444)),
+              const Icon(Icons.error_outline, size: 48, color: KikoColors.error),
               const SizedBox(height: 16),
               const Text(
                 'Unable to Load Assessment',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(color: KikoColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 _errorMessage ?? 'Assessment not found.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                style: const TextStyle(color: KikoColors.textSecondary, fontSize: 13),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E2D34),
+                  backgroundColor: KikoColors.primaryForest,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: _fetchExam,
                 icon: const Icon(Icons.refresh, size: 18),
@@ -348,7 +354,7 @@ class _TestScreenState extends State<TestScreen> {
       return const Center(
         child: Text(
           'No questions available in this assessment.',
-          style: TextStyle(color: Color(0xFF94A3B8)),
+          style: TextStyle(color: KikoColors.textSecondary),
         ),
       );
     }
@@ -369,13 +375,13 @@ class _TestScreenState extends State<TestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Course Indicator Banner (from Mockup Panel 5)
+                // Course Indicator Banner
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF121E24),
+                    color: KikoColors.secondarySurface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF1E2F38)),
+                    border: Border.all(color: KikoColors.border),
                   ),
                   child: Row(
                     children: [
@@ -383,15 +389,15 @@ class _TestScreenState extends State<TestScreen> {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.6),
+                          color: KikoColors.tertiaryMint,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.5)),
+                          border: Border.all(color: KikoColors.secondaryEmerald.withValues(alpha: 0.3)),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           isC ? 'C' : 'Py',
                           style: const TextStyle(
-                            color: Color(0xFF60A5FA),
+                            color: KikoColors.primaryForest,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'monospace',
@@ -406,7 +412,7 @@ class _TestScreenState extends State<TestScreen> {
                             Text(
                               widget.courseTitle,
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: KikoColors.textPrimary,
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -417,7 +423,7 @@ class _TestScreenState extends State<TestScreen> {
                               Text(
                                 _exam!.title,
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: KikoColors.textSecondary,
                                   fontSize: 11,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -438,7 +444,7 @@ class _TestScreenState extends State<TestScreen> {
                     Text(
                       'Question ${_currentIndex + 1} of ${questions.length}',
                       style: const TextStyle(
-                        color: Color(0xFF00A86B),
+                        color: KikoColors.primaryForest,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
@@ -446,12 +452,12 @@ class _TestScreenState extends State<TestScreen> {
                     if (selectedOption != null)
                       const Row(
                         children: [
-                          Icon(Icons.check, size: 14, color: Color(0xFF00A86B)),
+                          Icon(Icons.check, size: 14, color: KikoColors.secondaryEmerald),
                           SizedBox(width: 4),
                           Text(
                             'Answered',
                             style: TextStyle(
-                              color: Color(0xFF00A86B),
+                              color: KikoColors.secondaryEmerald,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -462,7 +468,7 @@ class _TestScreenState extends State<TestScreen> {
                       Text(
                         '$progressPct%',
                         style: const TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: KikoColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -476,8 +482,8 @@ class _TestScreenState extends State<TestScreen> {
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
                     value: (_currentIndex + 1) / questions.length,
-                    backgroundColor: const Color(0xFF16232A),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00A86B)),
+                    backgroundColor: KikoColors.secondarySurface,
+                    valueColor: const AlwaysStoppedAnimation<Color>(KikoColors.secondaryEmerald),
                     minHeight: 6,
                   ),
                 ),
@@ -488,14 +494,14 @@ class _TestScreenState extends State<TestScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF121E24),
+                    color: KikoColors.secondarySurface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF1E2F38), width: 1.2),
+                    border: Border.all(color: KikoColors.border, width: 1.2),
                   ),
                   child: Text(
                     currentQuestion.questionText,
                     style: KikoTypography.bodyLg(
-                      color: Colors.white,
+                      color: KikoColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ).copyWith(fontSize: 15, height: 1.5),
                   ),
@@ -520,13 +526,13 @@ class _TestScreenState extends State<TestScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF063327)
-                              : const Color(0xFF121E24),
+                              ? KikoColors.tertiaryMint
+                              : KikoColors.secondarySurface,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFF00A86B)
-                                : const Color(0xFF1E2F38),
+                                ? KikoColors.secondaryEmerald
+                                : KikoColors.border,
                             width: isSelected ? 1.8 : 1,
                           ),
                         ),
@@ -539,22 +545,22 @@ class _TestScreenState extends State<TestScreen> {
                               height: 32,
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? const Color(0xFF00A86B)
-                                    : const Color(0xFF18262E),
+                                    ? KikoColors.primaryForest
+                                    : KikoColors.hover,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: isSelected
-                                      ? const Color(0xFF00A86B)
-                                      : const Color(0xFF283B47),
+                                      ? KikoColors.primaryForest
+                                      : KikoColors.border,
                                 ),
                               ),
                               alignment: Alignment.center,
                               child: isSelected
-                                  ? const Icon(Icons.check, size: 18, color: Color(0xFF042F24))
+                                  ? const Icon(Icons.check, size: 18, color: Colors.white)
                                   : Text(
                                       optionLetter,
                                       style: const TextStyle(
-                                        color: Color(0xFF94A3B8),
+                                        color: KikoColors.textSecondary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                       ),
@@ -566,7 +572,7 @@ class _TestScreenState extends State<TestScreen> {
                               child: Text(
                                 optionText,
                                 style: TextStyle(
-                                  color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
+                                  color: KikoColors.textPrimary,
                                   fontSize: 14,
                                   height: 1.4,
                                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -595,8 +601,8 @@ class _TestScreenState extends State<TestScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: Color(0xFF10181C),
-        border: Border(top: BorderSide(color: Color(0xFF1B2830))),
+        color: KikoColors.surface,
+        border: Border(top: BorderSide(color: KikoColors.border)),
       ),
       child: SafeArea(
         top: false,
@@ -607,8 +613,9 @@ class _TestScreenState extends State<TestScreen> {
               flex: 1,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF94A3B8),
-                  side: const BorderSide(color: Color(0xFF2A3D49)),
+                  foregroundColor: KikoColors.textPrimary,
+                  side: const BorderSide(color: KikoColors.border),
+                  backgroundColor: KikoColors.secondarySurface,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -629,7 +636,7 @@ class _TestScreenState extends State<TestScreen> {
               child: isLast
                   ? ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF10B981),
+                        backgroundColor: KikoColors.secondaryEmerald,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -650,8 +657,8 @@ class _TestScreenState extends State<TestScreen> {
                     )
                   : ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1D343F),
-                        foregroundColor: const Color(0xFF34D399),
+                        backgroundColor: KikoColors.primaryForest,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,

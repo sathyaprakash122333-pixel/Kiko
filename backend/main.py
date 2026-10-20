@@ -3,16 +3,19 @@ from fastapi import Request
 import json
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta, date
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from database import SessionLocal
+from database import SessionLocal, get_db
 from init_db import init_database
-from models import Course, Lesson, Exam, ExamQuestion, ExamAttempt, LessonProgress, User
+from models import (
+    Course, Lesson, Exam, ExamQuestion, ExamAttempt, LessonProgress, User,
+    UserProfile, UserLearningActivity
+)
 from schemas import (
     CourseSummaryResponse,
     CourseDetailResponse,
@@ -31,9 +34,13 @@ from schemas import (
     QuestionResultDetail,
     ExamAttemptSummaryResponse,
     UserProfileResponse,
+    UserProfileDetailResponse,
     UserProfileUpdateRequest,
+    UserProfileUpdatePayload,
+    UserStreakResponse,
 )
 from auth import get_current_user
+
 
 
 @asynccontextmanager
@@ -73,12 +80,6 @@ app.add_middleware(
 )
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # ============================================================================
@@ -233,6 +234,144 @@ def get_lesson(lesson_id: int, db: Session = Depends(get_db)):
     )
 
 
+def record_learning_activity(
+    db: Session,
+    user: User,
+    activity_type: str,
+    entity_id: int | None = None,
+    activity_datetime: datetime | None = None,
+) -> UserLearningActivity:
+    now = activity_datetime or datetime.now(timezone.utc)
+    activity_date_str = now.strftime("%Y-%m-%d")
+
+    existing = (
+        db.query(UserLearningActivity)
+        .filter(
+            UserLearningActivity.user_id == user.id,
+            UserLearningActivity.activity_date == activity_date_str,
+            UserLearningActivity.activity_type == activity_type,
+            UserLearningActivity.entity_id == entity_id,
+        )
+        .first()
+    )
+    if existing:
+        return existing
+
+    record = UserLearningActivity(
+        user_id=user.id,
+        firebase_uid=user.firebase_uid,
+        activity_date=activity_date_str,
+        activity_type=activity_type,
+        entity_id=entity_id,
+        created_at=now,
+    )
+    db.add(record)
+    return record
+
+
+def calculate_user_streak(db: Session, user_id: int) -> UserStreakResponse:
+    # Query distinct activity dates from UserLearningActivity
+    activity_dates_query = (
+        db.query(UserLearningActivity.activity_date)
+        .filter(UserLearningActivity.user_id == user_id)
+        .distinct()
+        .all()
+    )
+    active_date_strings = set(r[0] for r in activity_dates_query)
+
+    # Include any existing LessonProgress completed_at dates
+    lesson_progress_dates = (
+        db.query(LessonProgress.completed_at)
+        .filter(
+            LessonProgress.user_id == user_id,
+            LessonProgress.is_completed.is_(True),
+            LessonProgress.completed_at.isnot(None),
+        )
+        .all()
+    )
+    for (dt,) in lesson_progress_dates:
+        if dt:
+            active_date_strings.add(dt.strftime("%Y-%m-%d"))
+
+    # Include any passed ExamAttempts
+    exam_dates = (
+        db.query(ExamAttempt.attempted_at)
+        .filter(
+            ExamAttempt.user_id == user_id,
+            ExamAttempt.passed.is_(True),
+            ExamAttempt.attempted_at.isnot(None),
+        )
+        .all()
+    )
+    for (dt,) in exam_dates:
+        if dt:
+            active_date_strings.add(dt.strftime("%Y-%m-%d"))
+
+    parsed_dates: list[date] = []
+    for d_str in active_date_strings:
+        try:
+            parsed_dates.append(datetime.strptime(d_str, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    parsed_dates.sort()
+
+    if not parsed_dates:
+        return UserStreakResponse(
+            current_streak=0,
+            longest_streak=0,
+            last_activity_date=None,
+            active_today=False,
+            total_active_days=0,
+            recent_active_dates=[],
+        )
+
+    today = datetime.now(timezone.utc).date()
+    yesterday = today - timedelta(days=1)
+    active_today = today in parsed_dates
+    last_date = parsed_dates[-1]
+
+    # Calculate longest streak
+    longest_streak = 0
+    current_run = 0
+    prev_d = None
+    for d in parsed_dates:
+        if prev_d is None or d == prev_d + timedelta(days=1):
+            current_run += 1
+        elif d == prev_d:
+            pass
+        else:
+            current_run = 1
+        if current_run > longest_streak:
+            longest_streak = current_run
+        prev_d = d
+
+    # Calculate current streak:
+    # Rule 3: The current streak is the number of consecutive active calendar days
+    # ending today, or yesterday if the user has not yet completed an activity today.
+    # Rule 4: If the most recent qualifying activity is older than yesterday, current streak is zero.
+    current_streak = 0
+    if last_date == today or last_date == yesterday:
+        date_set = set(parsed_dates)
+        check_date = last_date
+        while check_date in date_set:
+            current_streak += 1
+            check_date -= timedelta(days=1)
+    else:
+        current_streak = 0
+
+    recent_strings = [d.strftime("%Y-%m-%d") for d in parsed_dates[-14:]]
+
+    return UserStreakResponse(
+        current_streak=current_streak,
+        longest_streak=longest_streak,
+        last_activity_date=last_date.strftime("%Y-%m-%d"),
+        active_today=active_today,
+        total_active_days=len(parsed_dates),
+        recent_active_dates=recent_strings,
+    )
+
+
 @app.post(
     "/lessons/{lesson_id}/complete",
     response_model=LessonProgressResponse,
@@ -277,6 +416,15 @@ def complete_lesson(
         progress.is_completed = is_completed
         progress.completed_at = now if is_completed else None
 
+    if is_completed:
+        record_learning_activity(
+            db=db,
+            user=current_user,
+            activity_type="lesson_completion",
+            entity_id=lesson_id,
+            activity_datetime=now,
+        )
+
     try:
         db.commit()
         db.refresh(progress)
@@ -286,6 +434,7 @@ def complete_lesson(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update lesson completion progress",
         )
+
 
     return LessonProgressResponse(
         lesson_id=progress.lesson_id,
@@ -520,7 +669,15 @@ def get_overall_progress(
                 else 1
             )
         )
-        c_lang = exam.course.language if exam and exam.course else "General"
+        c_lang = (
+            exam.course.language
+            if exam and exam.course
+            else (
+                exam.lesson.course.language
+                if exam and exam.lesson and exam.lesson.course
+                else "General"
+            )
+        )
         pct = (
             round((a.score / a.total_questions) * 100.0, 1)
             if a.total_questions > 0
@@ -566,40 +723,91 @@ def get_overall_progress(
 
 
 # ============================================================================
-# User Profile Endpoints (Protected)
+# User Profile & Streak Endpoints (Protected)
 # ============================================================================
+
+def get_or_create_profile(db: Session, user: User) -> UserProfile:
+    profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+    if not profile:
+        now = datetime.now(timezone.utc)
+        profile = UserProfile(
+            user_id=user.id,
+            firebase_uid=user.firebase_uid,
+            email=user.email,
+            full_name=user.display_name,
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(profile)
+        try:
+            db.commit()
+            db.refresh(profile)
+        except Exception as exc:
+            db.rollback()
+            import logging
+            logging.getLogger("kiko").error("Failed to initialize user profile: %s", exc, exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to initialize user profile.",
+            )
+    return profile
+
+
+def _build_profile_response(user: User, profile: UserProfile) -> UserProfileDetailResponse:
+    raw_name = profile.full_name or user.display_name
+    name = raw_name.strip() if (raw_name and raw_name.strip()) else None
+    return UserProfileDetailResponse(
+        id=profile.id,
+        user_id=user.id,
+        firebase_uid=user.firebase_uid,
+        email=profile.email or user.email,
+        full_name=name,
+        display_name=name or (user.email.split("@")[0] if user.email else "Learner"),
+        date_of_birth=profile.date_of_birth,
+        gender=profile.gender,
+        city=profile.city,
+        institution=profile.institution,
+        degree=profile.degree,
+        department=profile.department,
+        academic_year=profile.academic_year,
+        semester=profile.semester,
+        created_at=profile.created_at,
+        updated_at=profile.updated_at,
+        last_login_at=user.last_login_at,
+    )
+
 
 @app.get(
     "/users/me",
-    response_model=UserProfileResponse,
+    response_model=UserProfileDetailResponse,
     tags=["Users"],
-    summary="Retrieve the authenticated user's profile",
+    summary="Retrieve the authenticated user's complete profile",
 )
 def get_user_profile(
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    return current_user
+    profile = get_or_create_profile(db, current_user)
+    return _build_profile_response(current_user, profile)
 
 
+@app.put(
+    "/users/me",
+    response_model=UserProfileDetailResponse,
+    tags=["Users"],
+    summary="Update complete profile fields for the authenticated user",
+)
 @app.patch(
     "/users/me",
-    response_model=UserProfileResponse,
+    response_model=UserProfileDetailResponse,
     tags=["Users"],
-    summary="Update permitted profile fields (display name) for the authenticated user",
+    summary="Update permitted profile fields for the authenticated user",
 )
 def update_user_profile(
-    payload: UserProfileUpdateRequest,
+    payload: UserProfileUpdatePayload,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    trimmed_name = payload.display_name.strip()
-    if not trimmed_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Display name cannot be empty or only whitespace.",
-        )
-
-    # Ensure user is attached to the active database session
     user = db.get(User, current_user.id)
     if not user:
         raise HTTPException(
@@ -607,9 +815,76 @@ def update_user_profile(
             detail="User not found in database.",
         )
 
-    user.display_name = trimmed_name
+    profile = get_or_create_profile(db, user)
+
+    # Validate and update full name / display name
+    new_name = None
+    if payload.full_name is not None:
+        trimmed = payload.full_name.strip()
+        if not trimmed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Full name cannot be empty or only whitespace.",
+            )
+        new_name = trimmed
+    elif payload.display_name is not None:
+        trimmed = payload.display_name.strip()
+        if not trimmed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Display name cannot be empty or only whitespace.",
+            )
+        new_name = trimmed
+
+    if new_name is not None:
+        profile.full_name = new_name
+        user.display_name = new_name
+
+    # Validate date of birth (must not be in future)
+    if payload.date_of_birth is not None:
+        dob_raw = payload.date_of_birth.strip()
+        if dob_raw:
+            parsed_date = None
+            for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d", "%b %d, %Y"):
+                try:
+                    parsed_date = datetime.strptime(dob_raw, fmt).date()
+                    break
+                except ValueError:
+                    continue
+            if parsed_date:
+                today_utc = datetime.now(timezone.utc).date()
+                if parsed_date > today_utc:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Date of birth cannot be in the future.",
+                    )
+                profile.date_of_birth = parsed_date.strftime("%b %d, %Y")
+            else:
+                profile.date_of_birth = dob_raw[:30]
+        else:
+            profile.date_of_birth = None
+
+    # Update optional fields
+    if payload.gender is not None:
+        profile.gender = payload.gender.strip() if payload.gender.strip() else None
+    if payload.city is not None:
+        profile.city = payload.city.strip() if payload.city.strip() else None
+    if payload.institution is not None:
+        profile.institution = payload.institution.strip() if payload.institution.strip() else None
+    if payload.degree is not None:
+        profile.degree = payload.degree.strip() if payload.degree.strip() else None
+    if payload.department is not None:
+        profile.department = payload.department.strip() if payload.department.strip() else None
+    if payload.academic_year is not None:
+        profile.academic_year = payload.academic_year.strip() if payload.academic_year.strip() else None
+    if payload.semester is not None:
+        profile.semester = payload.semester.strip() if payload.semester.strip() else None
+
+    profile.updated_at = datetime.now(timezone.utc)
+
     try:
         db.commit()
+        db.refresh(profile)
         db.refresh(user)
     except Exception:
         db.rollback()
@@ -618,7 +893,21 @@ def update_user_profile(
             detail="Failed to update user profile in database.",
         )
 
-    return user
+    return _build_profile_response(user, profile)
+
+
+@app.get(
+    "/users/me/streak",
+    response_model=UserStreakResponse,
+    tags=["Users"],
+    summary="Get persistent learning streak data for the authenticated user",
+)
+def get_user_streak(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return calculate_user_streak(db, current_user.id)
+
 
 
 # ============================================================================
@@ -803,8 +1092,18 @@ def submit_exam(
     )
     db.add(attempt)
 
+    if passed:
+        record_learning_activity(
+            db=db,
+            user=current_user,
+            activity_type="exam_completion",
+            entity_id=exam.id,
+            activity_datetime=now,
+        )
+
     try:
         db.commit()
+
         db.refresh(attempt)
     except Exception:
         db.rollback()
