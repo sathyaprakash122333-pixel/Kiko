@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/auth/logic/auth_service.dart';
+import 'package:frontend/features/auth/presentation/screens/login_screen.dart';
 import 'package:frontend/features/courses/logic/course_api_service.dart';
 import 'package:frontend/features/profile/logic/profile_api_service.dart';
 import 'package:frontend/features/profile/models/user_profile.dart';
@@ -34,6 +35,7 @@ class FakeProfileAuthService implements AuthService {
   final _controller = StreamController<fb.User?>.broadcast();
   fb.User? _currentUser;
   bool signedOut = false;
+  bool shouldFailSignOut = false;
 
   void emitUser(fb.User? user) {
     _currentUser = user;
@@ -54,6 +56,9 @@ class FakeProfileAuthService implements AuthService {
 
   @override
   Future<void> signOut() async {
+    if (shouldFailSignOut) {
+      throw Exception('Network disconnected during sign out');
+    }
     signedOut = true;
     emitUser(null);
   }
@@ -435,7 +440,7 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
     });
 
-    testWidgets('Tapping Sign Out calls authService.signOut()', (tester) async {
+    testWidgets('Tapping Sign Out calls authService.signOut(), navigates to Login, and prevents back navigation', (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -476,6 +481,65 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(fakeAuthService.signedOut, isTrue);
+      // Verify navigated to LoginScreen
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.byType(ProfileScreen), findsNothing);
+
+      // Verify that user cannot navigate back to ProfileScreen (stack cleared)
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      expect(navigator.canPop(), isFalse);
+    });
+
+    testWidgets('Failed Sign Out displays error SnackBar and does not falsely navigate to Login', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      fakeAuthService.shouldFailSignOut = true;
+
+      final mockClient = MockClient((request) async {
+        if (request.url.path == '/users/me/streak' || request.url.path == '/users/me/progress') {
+          return http.Response('{}', 200, headers: {'content-type': 'application/json'});
+        }
+        final data = {
+          'id': 101,
+          'firebase_uid': 'user_test_uid_12345678',
+          'email': 'sathyaprakash122333@gmail.com',
+          'full_name': 'Sathya Prakash',
+        };
+        return http.Response(jsonEncode(data), 200, headers: {'content-type': 'application/json'});
+      });
+
+      final service = ProfileApiService(authService: fakeAuthService, client: mockClient, baseUrl: 'http://127.0.0.1:8000');
+      final courseService = CourseApiService(client: mockClient, baseUrl: 'http://127.0.0.1:8000');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: KikoTheme.darkTheme,
+          home: ProfileScreen(
+            authService: fakeAuthService,
+            user: fakeAuthService.currentUser,
+            profileApiService: service,
+            courseApiService: courseService,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final signOutBtn = find.text('Sign Out');
+      await tester.ensureVisible(signOutBtn);
+      await tester.tap(signOutBtn);
+      await tester.pumpAndSettle();
+
+      // Sign out was not successful
+      expect(fakeAuthService.signedOut, isFalse);
+      // Error message is displayed in SnackBar
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('Network disconnected during sign out'), findsOneWidget);
+      // User is still on ProfileScreen and NOT navigated to LoginScreen
+      expect(find.byType(ProfileScreen), findsOneWidget);
+      expect(find.byType(LoginScreen), findsNothing);
     });
 
     testWidgets('Shows error view and allows Try Again when API fails', (tester) async {

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/kiko_app_shell.dart';
 import '../../../../core/widgets/kiko_top_header.dart';
 import '../../../auth/logic/auth_service.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../courses/logic/course_api_service.dart';
 import '../../../courses/models/course.dart';
 import '../../../courses/models/user_progress.dart';
@@ -46,6 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _errorMessage;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  bool _isSigningOut = false;
 
   @override
   void initState() {
@@ -60,6 +62,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignOut() async {
+    if (_isSigningOut) return;
+    setState(() => _isSigningOut = true);
+    try {
+      await _authService.signOut();
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => LoginScreen(authService: _authService),
+            settings: const RouteSettings(name: '/login'),
+          ),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign-out error: $e'),
+            backgroundColor: KikoColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSigningOut = false);
+      }
+    }
   }
 
   Future<void> _fetchCourses() async {
@@ -177,17 +209,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           OutlinedButton.icon(
-                            onPressed: () async {
-                              await _authService.signOut();
-                            },
-                            icon: const Icon(
-                              Icons.logout,
-                              size: 14,
-                              color: KikoColors.textSecondary,
-                            ),
-                            label: const Text(
-                              'Sign Out',
-                              style: TextStyle(
+                            key: const Key('dashboard_sign_out_button'),
+                            onPressed: _isSigningOut ? null : _handleSignOut,
+                            icon: _isSigningOut
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        KikoColors.textSecondary,
+                                      ),
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.logout,
+                                    size: 14,
+                                    color: KikoColors.textSecondary,
+                                  ),
+                            label: Text(
+                              _isSigningOut ? 'Signing out...' : 'Sign Out',
+                              style: const TextStyle(
                                 color: KikoColors.textSecondary,
                                 fontSize: 12,
                               ),

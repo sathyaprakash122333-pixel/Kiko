@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/auth/logic/auth_service.dart';
+import 'package:frontend/features/auth/presentation/screens/login_screen.dart';
 import 'package:frontend/features/courses/logic/course_api_service.dart';
 import 'package:frontend/features/courses/models/course.dart';
 import 'package:frontend/features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -32,6 +33,9 @@ class MockUser implements User {
 class FakeAuthService implements AuthService {
   final _controller = StreamController<User?>.broadcast();
   User? _currentUser;
+  bool signedOut = false;
+  bool shouldFailSignOut = false;
+  Completer<void>? signOutCompleter;
 
   void emitUser(User? user) {
     _currentUser = user;
@@ -52,6 +56,13 @@ class FakeAuthService implements AuthService {
 
   @override
   Future<void> signOut() async {
+    if (signOutCompleter != null) {
+      await signOutCompleter!.future;
+    }
+    if (shouldFailSignOut) {
+      throw Exception('Network disconnected during sign out');
+    }
+    signedOut = true;
     emitUser(null);
   }
 
@@ -258,6 +269,147 @@ void main() {
       // Now courses are loaded successfully
       expect(find.byType(CourseCard), findsNWidgets(2));
       expect(find.text('Introduction to C Programming'), findsOneWidget);
+    });
+
+    testWidgets('Tapping Sign Out on Dashboard calls authService.signOut(), navigates to LoginScreen, and prevents back navigation', (tester) async {
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 1,
+              'title': 'Introduction to C Programming',
+              'description': 'A foundational course covering C.',
+              'language': 'C',
+              'lesson_count': 4,
+            },
+          ]),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = CourseApiService(client: mockClient, baseUrl: 'http://127.0.0.1:8000');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: KikoTheme.darkTheme,
+          home: DashboardScreen(
+            authService: fakeAuthService,
+            user: fakeAuthService.currentUser,
+            courseApiService: service,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final signOutBtn = find.byKey(const Key('dashboard_sign_out_button'));
+      expect(signOutBtn, findsOneWidget);
+
+      await tester.tap(signOutBtn);
+      await tester.pumpAndSettle();
+
+      // Sign out was called
+      expect(fakeAuthService.signedOut, isTrue);
+
+      // Navigated to LoginScreen
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.byType(DashboardScreen), findsNothing);
+
+      // Back navigation is prevented (stack cleared)
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      expect(navigator.canPop(), isFalse);
+    });
+
+    testWidgets('Failed Sign Out on Dashboard displays error SnackBar and does not falsely navigate', (tester) async {
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      fakeAuthService.shouldFailSignOut = true;
+
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode([]),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = CourseApiService(client: mockClient, baseUrl: 'http://127.0.0.1:8000');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: KikoTheme.darkTheme,
+          home: DashboardScreen(
+            authService: fakeAuthService,
+            user: fakeAuthService.currentUser,
+            courseApiService: service,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final signOutBtn = find.byKey(const Key('dashboard_sign_out_button'));
+      await tester.tap(signOutBtn);
+      await tester.pumpAndSettle();
+
+      // Sign out failed
+      expect(fakeAuthService.signedOut, isFalse);
+
+      // Error SnackBar shown
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('Network disconnected during sign out'), findsOneWidget);
+
+      // User remains on DashboardScreen
+      expect(find.byType(DashboardScreen), findsOneWidget);
+      expect(find.byType(LoginScreen), findsNothing);
+    });
+
+    testWidgets('Dashboard Sign Out button disables during logout to prevent duplicate requests', (tester) async {
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final completer = Completer<void>();
+      fakeAuthService.signOutCompleter = completer;
+
+      final mockClient = MockClient((request) async {
+        return http.Response(jsonEncode([]), 200, headers: {'content-type': 'application/json'});
+      });
+      final service = CourseApiService(client: mockClient, baseUrl: 'http://127.0.0.1:8000');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: KikoTheme.darkTheme,
+          home: DashboardScreen(
+            authService: fakeAuthService,
+            user: fakeAuthService.currentUser,
+            courseApiService: service,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final signOutBtn = find.byKey(const Key('dashboard_sign_out_button'));
+      await tester.tap(signOutBtn);
+      await tester.pump(); // Start async sign out
+
+      // While in progress, button shows 'Signing out...' and is disabled
+      expect(find.text('Signing out...'), findsOneWidget);
+      final buttonWidget = tester.widget<OutlinedButton>(signOutBtn);
+      expect(buttonWidget.onPressed, isNull);
+
+      // Complete sign-out
+      completer.complete();
+      await tester.pumpAndSettle();
+
+      expect(fakeAuthService.signedOut, isTrue);
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
   });
 }

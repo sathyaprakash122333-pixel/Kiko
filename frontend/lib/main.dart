@@ -37,10 +37,18 @@ class KikoApp extends StatelessWidget {
       home: LoginScreen(authService: auth),
       routes: {
         '/login': (context) => LoginScreen(authService: auth),
-        '/dashboard': (context) => DashboardScreen(authService: auth),
-        '/courses': (context) => CoursesScreen(authService: auth),
-        '/progress': (context) => ProgressScreen(authService: auth),
-        '/profile': (context) => ProfileScreen(authService: auth),
+        '/dashboard': (context) => auth.currentUser == null
+            ? LoginScreen(authService: auth)
+            : DashboardScreen(authService: auth),
+        '/courses': (context) => auth.currentUser == null
+            ? LoginScreen(authService: auth)
+            : CoursesScreen(authService: auth),
+        '/progress': (context) => auth.currentUser == null
+            ? LoginScreen(authService: auth)
+            : ProgressScreen(authService: auth),
+        '/profile': (context) => auth.currentUser == null
+            ? LoginScreen(authService: auth)
+            : ProfileScreen(authService: auth),
       },
     );
   }

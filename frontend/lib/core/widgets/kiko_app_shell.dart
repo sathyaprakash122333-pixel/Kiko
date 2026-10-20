@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import '../../features/auth/logic/auth_service.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/courses/presentation/screens/courses_screen.dart';
 import '../../features/courses/presentation/screens/progress_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -41,22 +42,41 @@ class KikoAppShell extends StatelessWidget {
   bool get _isProfile => currentTab == KikoTab.profile;
 
   void _navigateToTab(BuildContext context, KikoTab target) {
-    final auth = authService ?? AuthService();
-    final currentUser = user ?? auth.currentUser;
+    AuthService? auth = authService;
+    if (auth == null) {
+      try {
+        auth = AuthService();
+      } catch (_) {
+        auth = null;
+      }
+    }
+    final currentUser = user ?? auth?.currentUser;
+
+    if (currentUser == null && auth != null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => LoginScreen(authService: auth),
+          settings: const RouteSettings(name: '/login'),
+        ),
+        (route) => false,
+      );
+      return;
+    }
 
     if (target == KikoTab.home || target == KikoTab.dashboard) {
       if (_isHome) return;
-      Navigator.of(context).pushAndRemoveUntil(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => DashboardScreen(authService: auth, user: currentUser),
+          builder: (_) => DashboardScreen(authService: auth ?? AuthService(), user: currentUser),
+          settings: const RouteSettings(name: '/dashboard'),
         ),
-        (route) => route.isFirst,
       );
     } else if (target == KikoTab.learn || target == KikoTab.courses) {
       if (_isLearn) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => CoursesScreen(authService: auth, user: currentUser),
+          settings: const RouteSettings(name: '/courses'),
         ),
       );
     } else if (target == KikoTab.progress) {
@@ -64,13 +84,15 @@ class KikoAppShell extends StatelessWidget {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => ProgressScreen(authService: auth, user: currentUser),
+          settings: const RouteSettings(name: '/progress'),
         ),
       );
     } else if (target == KikoTab.profile) {
       if (_isProfile) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => ProfileScreen(authService: auth, user: currentUser),
+          builder: (_) => ProfileScreen(authService: auth ?? AuthService(), user: currentUser),
+          settings: const RouteSettings(name: '/profile'),
         ),
       );
     }

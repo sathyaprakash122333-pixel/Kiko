@@ -5,6 +5,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/google_logo.dart';
 import '../../../../core/widgets/kiko_app_shell.dart';
 import '../../../auth/logic/auth_service.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../courses/logic/course_api_service.dart';
 import '../../../courses/models/user_progress.dart';
 import '../../logic/profile_api_service.dart';
@@ -113,7 +114,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await widget.authService.signOut();
       if (mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => LoginScreen(authService: widget.authService),
+            settings: const RouteSettings(name: '/login'),
+          ),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -858,6 +865,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: double.infinity,
             height: 48,
             child: OutlinedButton.icon(
+              key: const Key('profile_sign_out_button'),
               onPressed: _isSigningOut ? null : _handleSignOut,
               icon: _isSigningOut
                   ? const SizedBox(
