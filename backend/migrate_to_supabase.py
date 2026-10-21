@@ -20,7 +20,7 @@ from sqlalchemy.orm import sessionmaker
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from database import Base
+from database import Base, normalize_database_url, mask_db_url
 import models
 from init_db import init_database
 
@@ -192,13 +192,9 @@ def verify_target_data(engine, expected_counts: dict[str, int]) -> tuple[bool, d
 
 
 def run_migration(database_url: str, backup_file: Path, verify_only: bool = False):
+    database_url = normalize_database_url(database_url)
     masked_url = mask_db_url(database_url)
     logger.info("Initializing migration target: %s", masked_url)
-
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
-    elif database_url.startswith("postgresql://") and not database_url.startswith("postgresql+"):
-        database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
     # Configure SQLAlchemy engine for PostgreSQL
     engine = create_engine(
