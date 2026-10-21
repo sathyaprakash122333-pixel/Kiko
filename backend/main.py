@@ -1409,6 +1409,20 @@ async def import_content(
 
         db.commit()
 
+        # Synchronize PostgreSQL serial sequences if running against PostgreSQL
+        if db.bind and db.bind.dialect.name == "postgresql":
+            for table_name in ["courses", "lessons", "exams", "exam_questions"]:
+                try:
+                    seq_query = text(f"SELECT pg_get_serial_sequence('\"{table_name}\"', 'id')")
+                    seq_name = db.execute(seq_query).scalar()
+                    if seq_name:
+                        max_id = db.execute(text(f'SELECT MAX(id) FROM "{table_name}"')).scalar()
+                        if max_id:
+                            db.execute(text(f"SELECT setval('{seq_name}', {max_id}, true)"))
+                    db.commit()
+                except Exception:
+                    pass
+
         return {
             "status": "success",
             "imported": {

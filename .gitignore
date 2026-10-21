@@ -38,6 +38,9 @@ kiko.db-*
 backend/*.backup*
 kiko_content_export.json
 backend/kiko_content_export.json
+*export*.json
+backend/*export*.json
+*backups/
 design
 design/
 frontend/design/

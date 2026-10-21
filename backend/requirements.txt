@@ -36,6 +36,8 @@ pycparser==3.11
 pydantic==2.14.1
 pydantic_core==2.50.1
 PyJWT==2.15.1
+psycopg2-binary==2.9.13
+psycopg[binary]==3.3.6
 requests==2.34.2
 SQLAlchemy==2.1.5
 starlette==1.8.0
@@ -43,3 +45,4 @@ typing-inspection==0.4.4
 typing_extensions==4.16.0
 urllib3==2.8.0
 uvicorn==0.54.0
+
